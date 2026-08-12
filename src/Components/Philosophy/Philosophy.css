@@ -1,0 +1,175 @@
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital@0;1&family=Poppins:wght@400;500;600&display=swap");
+
+.rl-philosophy {
+  --rl-cream: #fdfbf6;
+  --rl-ink: #201d18;
+  --rl-gold: #c7a642;
+  --rl-muted: #7a746a;
+  font-family: "Poppins", sans-serif;
+  background: var(--rl-cream);
+  padding-bottom: 3rem;
+}
+
+/* --- statement --- */
+
+.rl-philosophy__statement {
+  background: var(--rl-cream);
+  padding: 80px 24px 96px;
+  text-align: center;
+}
+
+.rl-philosophy__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--rl-muted);
+  margin-bottom: 28px;
+}
+
+.rl-philosophy__eyebrow-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--rl-gold);
+  display: inline-block;
+}
+
+.rl-philosophy__text {
+  max-width: 1160px;
+  margin: 0 auto;
+  font-family: "Playfair Display", serif;
+  font-size: clamp(26px, 3.4vw, 42px);
+  line-height: 1.55;
+  color: var(--rl-ink);
+}
+
+.rl-philosophy__inline {
+  display: inline-block;
+  width: 120px;
+  height: 64px;
+  aspect-ratio: 2.1 / 1;
+  object-fit: cover;
+  vertical-align: text-bottom;
+  margin: 0 10px;
+  transform: translateY(-2px);
+}
+
+.rl-philosophy__inline--pill {
+  border-radius: 999px;
+}
+
+/* .rl-philosophy__inline--round {
+  aspect-ratio: 1 / 1;
+  border-radius: 50%;
+} */
+
+/* --- grid --- */
+
+.rl-philosophy__grid {
+        max-width: 1440px;
+    margin: auto;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  
+}
+
+.rl-philosophy__card {
+  position: relative;
+  display: block;
+  aspect-ratio: 3 / 4;
+  background-size: cover;
+  background-position: center;
+  background-color: #d8d2c6;
+  text-decoration: none;
+  overflow: hidden;
+}
+.rl-philosophy__card-image {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  transform: scale(1);
+  transition: transform 1.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+  will-change: transform;
+}
+ 
+.rl-philosophy__card:hover .rl-philosophy__card-image {
+  transform: scale(1.08);
+}
+ 
+@media (prefers-reduced-motion: reduce) {
+  .rl-philosophy__card-image {
+    transition: none;
+  }
+}
+
+.rl-philosophy__card-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0) 55%,
+    rgba(0, 0, 0, 0.55) 100%
+  );
+}
+
+.rl-philosophy__card-content {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 24px 28px 28px;
+  color: #ffffff;
+}
+
+.rl-philosophy__card-title {
+  font-family: "Playfair Display", serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: 22px;
+  margin: 0 0 8px;
+}
+
+.rl-philosophy__card-subtitle {
+  font-size: 13px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0 0 14px;
+  line-height: 1.4;
+}
+
+.rl-philosophy__card-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: #ffffff;
+  transition: gap 0.2s ease;
+}
+
+.rl-philosophy__card:hover .rl-philosophy__card-link {
+  gap: 12px;
+}
+
+@media (max-width: 860px) {
+  .rl-philosophy__statement {
+    padding: 56px 20px 64px;
+  }
+  .rl-philosophy__inline {
+    margin: 0 6px;
+  }
+  .rl-philosophy__grid {
+    grid-template-columns: 1fr;
+  }
+  .rl-philosophy__card {
+    aspect-ratio: 4 / 3;
+  }
+}

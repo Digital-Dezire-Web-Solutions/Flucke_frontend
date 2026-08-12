@@ -1,0 +1,64 @@
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@400;500;600&display=swap");
+
+.rl-luxury-cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  padding: 56px 64px;
+  background: #000000;
+  font-family: "Poppins", sans-serif;
+  flex-wrap: wrap;
+}
+
+.rl-luxury-cta__text {
+  min-width: 260px;
+}
+
+.rl-luxury-cta__heading {
+  font-family: "Anton", sans-serif;
+  font-weight: 500;
+  font-size: clamp(28px, 3.4vw, 44px);
+  color: white;
+  margin: 0 0 12px;
+  line-height: 1.15;
+}
+
+.rl-luxury-cta__subheading {
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+}
+
+.rl-luxury-cta__btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #fdfaf3;
+  color: #a3813f;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 20px 40px;
+  border-radius: 999px;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.rl-luxury-cta__btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+}
+
+@media (max-width: 640px) {
+  .rl-luxury-cta {
+    padding: 40px 24px;
+    justify-content: center;
+    text-align: center;
+  }
+  .rl-luxury-cta__btn {
+    width: 100%;
+  }
+}

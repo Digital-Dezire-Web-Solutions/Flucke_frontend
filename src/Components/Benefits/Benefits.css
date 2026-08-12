@@ -1,0 +1,94 @@
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600&display=swap");
+
+.rl-benefits {
+  --rl-cream: #fdfbf6;
+  --rl-gold: #b6924f;
+  --rl-ink: #1c1a17;
+  --rl-body: #6f6a63;
+  --rl-card-border: #ece7dc;
+  /* background: var(--rl-cream); */
+  padding: 88px 64px;
+  display: grid;
+  grid-template-columns: minmax(0, 620px) minmax(0, 1fr);
+  align-items: center;
+  gap: 48px;
+  font-family: "Poppins", sans-serif;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+.rl-benefits__eyebrow {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--rl-gold);
+  margin-bottom: 22px;
+}
+
+.rl-benefits__heading {
+  font-family: "Anton", sans-serif;
+  font-weight: 400;
+  font-size: clamp(34px, 5.5vw, 64px);
+  letter-spacing: 0px;
+  text-transform: uppercase;
+  color: var(--rl-ink);
+  margin: 0;
+  line-height: 70px;
+}
+
+.rl-benefits__subheading {
+  font-size: 17px;
+  line-height: 1.7;
+  color: var(--rl-body);
+  max-width: 480px;
+  margin: 0;
+}
+
+.rl-benefits__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.rl-benefits__card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: var(--rl-cream);
+  border: 1px solid var(--rl-card-border);
+  border-radius: 16px;
+  padding: 28px 20px;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--rl-ink);
+  text-align: center;
+  box-shadow: 0 12px 28px rgba(30, 25, 15, 0.05);
+}
+
+.rl-benefits__check {
+  color: var(--rl-ink);
+  font-weight: 700;
+}
+
+@media (max-width: 1000px) {
+  .rl-benefits {
+    grid-template-columns: 1fr;
+    padding: 64px 32px;
+  }
+}
+
+@media (max-width: 560px) {
+  .rl-benefits {
+    padding: 48px 20px;
+  }
+  .rl-benefits__grid {
+    grid-template-columns: 1fr;
+  }
+  .rl-benefits__card {
+    padding: 22px 18px;
+    font-size: 16px;
+  }
+}

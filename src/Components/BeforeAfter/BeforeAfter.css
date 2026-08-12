@@ -1,0 +1,218 @@
+@import url("https://fonts.googleapis.com/css2?family=Anton&family=Poppins:wght@400;500;600&display=swap");
+
+.rl-before-after {
+  --rl-cream: #fdfbf6;
+  --rl-ink: #17140f;
+  --rl-peach: #f2d9c2;
+  --rl-lime: #dcec9a;
+  background: var(--rl-cream);
+  padding: 5rem 0;
+  font-family: "Poppins", sans-serif;
+}
+
+.rl-before-after__main {
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+/* --- intro --- */
+
+.rl-before-after__intro {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.rl-before-after__badge {
+  display: inline-block;
+  border: 1px solid var(--rl-ink);
+  border-radius: 999px;
+  padding: 10px 22px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: var(--rl-ink);
+  margin-bottom: 22px;
+}
+
+.rl-before-after__heading {
+  font-family: "Anton", sans-serif;
+  font-weight: 400;
+  font-size: clamp(34px, 5.5vw, 64px);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--rl-ink);
+  margin: 0;
+}
+
+/* --- frame --- */
+
+.rl-before-after__frame {
+  position: relative;
+  aspect-ratio: 19 / 10;
+  border-radius: 28px;
+  overflow: hidden;
+  cursor: ew-resize;
+  background: #cfc7ba;
+  user-select: none;
+  touch-action: none;
+  margin: 0 1rem;
+}
+
+.rl-before-after__image {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center top;
+}
+
+.rl-before-after__image--after {
+  will-change: clip-path;
+}
+
+/* --- divider --- */
+
+.rl-before-after__divider {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: rgba(255, 255, 255, 0.9);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.rl-before-after__handle {
+  position: absolute;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  pointer-events: auto;
+}
+
+.rl-before-after__nudge {
+  width: 22px;
+  height: 22px;
+  border: none;
+  background: transparent;
+  color: #ffffff;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* --- tags --- */
+
+.rl-before-after__tag {
+  position: absolute;
+  bottom: 24px;
+  background: var(--rl-lime);
+  color: var(--rl-ink);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  padding: 10px 18px;
+  border-radius: 8px;
+}
+
+.rl-before-after__tag--before {
+  left: 24px;
+}
+
+.rl-before-after__tag--after {
+  right: 24px;
+}
+
+/* --- callouts --- */
+
+.rl-before-after__callout {
+  position: absolute;
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  pointer-events: none;
+}
+
+.rl-before-after__callout-dot {
+  position: absolute;
+  left: -1px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ffffff;
+  transform: translateX(-50%);
+}
+
+.rl-before-after__callout-dot--top {
+  top: -1px;
+}
+
+.rl-before-after__callout-dot--bottom {
+  bottom: -1px;
+}
+
+.rl-before-after__callout-text {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  white-space: nowrap;
+  width: max-content;
+}
+
+.rl-before-after__callout--right .rl-before-after__callout-text {
+  right: calc(100% + 18px);
+  align-items: flex-end;
+  text-align: right;
+}
+
+.rl-before-after__callout--left .rl-before-after__callout-text {
+  left: calc(100% + 18px);
+  align-items: flex-start;
+  text-align: left;
+}
+
+.rl-before-after__callout-eyebrow {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--rl-peach);
+  opacity: 0.9;
+}
+
+.rl-before-after__callout-label {
+  font-family: "Anton", sans-serif;
+  font-weight: 400;
+  font-size: 24px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--rl-peach);
+}
+
+@media (max-width: 720px) {
+  .rl-before-after {
+    padding: 3rem 0 5rem;
+  }
+  .rl-before-after__frame {
+    /* aspect-ratio: 3 / 4; */
+    border-radius: 18px;
+    margin: 2px;
+  }
+  .rl-before-after__callout-eyebrow {
+    font-size: 11px;
+  }
+  .rl-before-after__callout-label {
+    font-size: 17px;
+  }
+  .rl-before-after__callout--right .rl-before-after__callout-text,
+  .rl-before-after__callout--left .rl-before-after__callout-text {
+    white-space: normal;
+    width: 110px;
+  }
+}

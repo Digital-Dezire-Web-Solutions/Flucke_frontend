@@ -1,0 +1,111 @@
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600&display=swap");
+
+.rl-about {
+  --rl-gold: #b6924f;
+  --rl-ink: #1c1a17;
+  --rl-body: #6f6a63;
+  --rl-card-border: #e8e3d9;
+  --rl-icon-bg: #f7f3ea;
+  /* background: #ffffff; */
+  padding: 4rem 2rem;
+  font-family: "Poppins", sans-serif;
+}
+
+.rl-about__intro {
+  max-width: 1160px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.rl-about__eyebrow {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--rl-gold);
+  margin-bottom: 14px;
+}
+
+.rl-about__heading {
+  font-family: "Anton", sans-serif;
+  font-weight: 500;
+  font-size: clamp(34px, 4.5vw, 56px);
+  color: var(--rl-ink);
+  margin: 0 0 34px;
+  line-height: 1.15;
+  text-transform: uppercase;
+  /* letter-spacing: 5px; */
+}
+
+.rl-about__paragraph {
+  font-size: 18px;
+  line-height: 1.7;
+  color: var(--rl-body);
+  margin: 0 0 20px;
+}
+
+.rl-about__lead {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--rl-ink);
+  margin: 28px 0 0;
+}
+
+.rl-about__cards {
+  max-width: 1440px;
+  margin: 56px auto 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+}
+
+.rl-about__card {
+  border: 1px solid var(--rl-card-border);
+  border-radius: 18px;
+  padding: 2rem;
+  text-align: center;
+  box-shadow:
+    10px 10px 20px #e8e3d988,
+    -10px -10px 20px #e8e3d988;
+}
+
+.rl-about__card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: var(--rl-icon-bg);
+  font-size: 34px;
+  margin-bottom: 32px;
+}
+
+.rl-about__card-title {
+  font-family: "Anton", sans-serif;
+  font-weight: 500;
+  font-size: 24px;
+  color: var(--rl-ink);
+  margin: 0 0 18px;
+}
+
+.rl-about__card-text {
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--rl-body);
+  margin: 0;
+}
+
+@media (max-width: 860px) {
+  .rl-about {
+    padding: 64px 20px 72px;
+  }
+  .rl-about__cards {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .rl-about__card {
+    padding: 44px 28px 40px;
+  }
+}

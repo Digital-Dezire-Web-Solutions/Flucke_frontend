@@ -159,18 +159,24 @@ export default function Account({ onLogout }) {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              fontFamily: "'Playfair Display', serif",
+              fontFamily: "'Anton', serif",
               fontSize: 32,
               color: "#3d382f",
             }}
           >
-            {user.name}
+            {(user?.name || "")
+              .trim()
+              .split(" ")
+              .filter(Boolean)
+              .map((word) => word[0].toUpperCase())
+              .join("")}
           </div>
         )}
         <div>
           <h1 className="rl-account__hero-name">Hello, {user.name}!</h1>
           <p className="rl-account__hero-meta">
-            {user.email} · Member since {new Date(user.createdAt).toLocaleDateString()}
+            {user.email} · Member since{" "}
+            {new Date(user.createdAt).toLocaleDateString()}
           </p>
         </div>
       </section>

@@ -69,7 +69,7 @@ export default function SettingsTab({ user, onSaveProfile, onUpdatePassword, onD
                             <input
                                 type="text"
                                 value={profile.name}
-                                onChange={(e) => setProfile((p) => ({ ...p, firstName: e.target.value }))}
+                                onChange={(e) => setProfile((p) => ({ ...p, name: e.target.value }))}
                             />
                         </label>
                     <div className="rl-field-row">

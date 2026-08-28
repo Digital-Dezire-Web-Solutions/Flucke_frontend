@@ -32,7 +32,7 @@ export default function DashboardTab({ user, onEditPersonalInfo, onViewAllOrders
                 <dl className="rl-info-grid">
                     <div>
                         <dt>Full Name</dt>
-                        <dd>{user.firstName} {user.lastName}</dd>
+                        <dd>{user.name}</dd>
                     </div>
                     <div>
                         <dt>Email</dt>

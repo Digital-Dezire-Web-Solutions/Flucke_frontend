@@ -53,11 +53,10 @@ export default function AuthModal({ isOpen, onClose, onLogin, onSignup }) {
         });
       } else {
         await onSignup?.({
-          firstName: form.get("firstName"),
-          lastName: form.get("lastName"),
+          name: form.get("name"),
           email: form.get("email"),
+          phone:form.get("phone"),
           password: form.get("password"),
-          subscribe: form.get("subscribe") === "on",
         });
       }
       onClose();
@@ -115,8 +114,8 @@ export default function AuthModal({ isOpen, onClose, onLogin, onSignup }) {
                     <span>First name*</span>
                     <input
                       type="text"
-                      name="firstName"
-                      placeholder="Your first name"
+                      name="name"
+                      placeholder="Your Full name"
                       required={mode === "signup"}
                       tabIndex={mode === "signup" ? 0 : -1}
                     />

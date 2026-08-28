@@ -22,7 +22,7 @@ export const getProduct = createAsyncThunk(
 );
 
 export const createProduct = createAsyncThunk(
-  "products/createProduct",
+  "products/create",
   async (data, thunkAPI) => {
     try {
       const res = await api.post("/products", data);
@@ -34,7 +34,7 @@ export const createProduct = createAsyncThunk(
 );
 
 export const updateProduct = createAsyncThunk(
-  "products/updateProduct",
+  "products/update",
   async ({ id, data }, thunkAPI) => {
     try {
       const res = await api.put(`/products/${id}`, data);

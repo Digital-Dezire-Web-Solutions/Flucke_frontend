@@ -1,7 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import "./AdminTable.css";
-import { createProduct, deleteProduct, getProducts, updateProduct } from "../../Redux/features/products/productSlice";
+import {
+  createProduct,
+  deleteProduct,
+  getProducts,
+  updateProduct,
+} from "../../Redux/features/products/productSlice";
 
 const initialProduct = {
   name: "",
@@ -28,31 +33,39 @@ export default function Products() {
   }, [dispatch]);
 
   const filteredProducts = products.filter((item) =>
-    item.name.toLowerCase().includes(search.toLowerCase())
+    item.name.toLowerCase().includes(search.toLowerCase()),
   );
 
   const handleSave = async () => {
-    const payload = {
-      ...product,
-      images:
-        typeof product.images === "string"
-          ? product.images
-              .split(",")
-              .map((i) => i.trim())
-              .filter(Boolean)
-          : product.images,
-    };
+    const formData = new FormData();
+
+    formData.append("name", product.name);
+    formData.append("description", product.description);
+    formData.append("category", product.category);
+    formData.append("brand", product.brand);
+    formData.append("price", product.price);
+    formData.append("salePrice", product.salePrice);
+    formData.append("stock", product.stock);
+
+    product.images.forEach((image) => {
+      // upload only newly selected files
+      if (image instanceof File) {
+        formData.append("images", image);
+      }
+    });
 
     if (product._id) {
       await dispatch(
         updateProduct({
           id: product._id,
-          data: payload,
-        })
+          data: formData,
+        }),
       );
     } else {
-      await dispatch(createProduct(payload));
+      await dispatch(createProduct(formData));
     }
+
+    dispatch(getProducts());
 
     setOpen(false);
     setProduct(initialProduct);
@@ -66,13 +79,10 @@ export default function Products() {
 
   return (
     <div className="admin-table-wrapper">
-
       <div className="table-header">
-
         <h2>Products</h2>
 
         <div style={{ display: "flex", gap: 10 }}>
-
           <input
             placeholder="Search product..."
             value={search}
@@ -88,17 +98,12 @@ export default function Products() {
           >
             + Add Product
           </button>
-
         </div>
-
       </div>
 
       <table className="admin-table">
-
         <thead>
-
           <tr>
-
             <th>Image</th>
 
             <th>Name</th>
@@ -114,19 +119,13 @@ export default function Products() {
             <th>Stock</th>
 
             <th>Action</th>
-
           </tr>
-
         </thead>
 
         <tbody>
-
           {filteredProducts.map((item) => (
-
             <tr key={item._id}>
-
               <td>
-
                 <img
                   src={item.images?.[0]}
                   alt={item.name}
@@ -137,7 +136,6 @@ export default function Products() {
                     borderRadius: 8,
                   }}
                 />
-
               </td>
 
               <td>{item.name}</td>
@@ -153,13 +151,12 @@ export default function Products() {
               <td>{item.stock}</td>
 
               <td>
-
                 <button
                   className="edit-btn"
                   onClick={() => {
                     setProduct({
                       ...item,
-                      images: item.images?.join(", "),
+                      images: item.images || [],
                     });
 
                     setOpen(true);
@@ -174,28 +171,16 @@ export default function Products() {
                 >
                   Delete
                 </button>
-
               </td>
-
             </tr>
-
           ))}
-
         </tbody>
-
       </table>
 
       {open && (
-
         <div className="admin-modal-overlay">
-
           <div className="admin-modal">
-
-            <h3>
-              {product._id
-                ? "Edit Product"
-                : "Add Product"}
-            </h3>
+            <h3>{product._id ? "Edit Product" : "Add Product"}</h3>
 
             <input
               placeholder="Product Name"
@@ -285,19 +270,29 @@ export default function Products() {
               }
             />
 
+            <label className="image-upload">Product Images</label>
+
             <input
-              placeholder="Image URLs (comma separated)"
-              value={product.images}
+              type="file"
+              multiple
+              accept="image/*"
               onChange={(e) =>
                 setProduct({
                   ...product,
-                  images: e.target.value,
+                  images: [...e.target.files],
                 })
               }
             />
+            <div className="image-preview">
+              {product.images?.length > 0 &&
+                product.images.map((img, index) => {
+                  const src =
+                    typeof img === "string" ? img : URL.createObjectURL(img);
 
+                  return <img key={index} src={src} alt="" />;
+                })}
+            </div>
             <div className="modal-actions">
-
               <button
                 onClick={() => {
                   setOpen(false);
@@ -307,21 +302,13 @@ export default function Products() {
                 Cancel
               </button>
 
-              <button
-                className="save-btn"
-                onClick={handleSave}
-              >
+              <button className="save-btn" onClick={handleSave}>
                 Save
               </button>
-
             </div>
-
           </div>
-
         </div>
-
       )}
-
     </div>
   );
 }

@@ -101,35 +101,31 @@ export default function Navbar() {
     };
 
     const handleLogin = async (data) => {
-        const result = await dispatch(login(data));
+        const result = await dispatch(login(data)).unwrap();
 
-        if (login.fulfilled.match(result)) {
-            setIsAuthOpen(false);
+        const user = result.user;
 
-            const user = result.payload.user;
-
-            if (user.role === "admin") {
-                navigate("/admin");
-            } else {
-                navigate("/account");
-            }
+        if (user.role === "admin") {
+            navigate("/admin");
+        } else {
+            navigate("/account");
         }
+
+        return result;
     };
 
     const handleSignup = async (data) => {
-        const result = await dispatch(register(data));
+        const result = await dispatch(register(data)).unwrap();
 
-        if (register.fulfilled.match(result)) {
-            setIsAuthOpen(false);
+        const user = result.user;
 
-            const user = result.payload.user;
-
-            if (user.role === "admin") {
-                navigate("/admin");
-            } else {
-                navigate("/account");
-            }
+        if (user.role === "admin") {
+            navigate("/admin");
+        } else {
+            navigate("/account");
         }
+
+        return result;
     };
 
 

@@ -245,6 +245,16 @@
   cursor: not-allowed;
 }
 
+.auth-modal__error {
+  margin: 12px 0;
+  color: #dc2626;
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  padding: 10px 14px;
+  border-radius: 50px;
+  font-size: 14px;
+}
+
 .auth-modal__switch {
   background: none;
   border: none;

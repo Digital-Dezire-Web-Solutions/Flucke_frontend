@@ -42,26 +42,33 @@ export default function AuthModal({ isOpen, onClose, onLogin, onSignup }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
-    const form = new FormData(e.target);
+
     setSubmitting(true);
+    setError("");
+
+    const form = new FormData(e.target);
+
     try {
       if (mode === "login") {
-        await onLogin?.({
+        await onLogin({
           email: form.get("email"),
           password: form.get("password"),
         });
       } else {
-        await onSignup?.({
+        await onSignup({
           name: form.get("name"),
           email: form.get("email"),
-          phone:form.get("phone"),
+          phone: form.get("phone"),
           password: form.get("password"),
         });
       }
+
+      // only close after success
       onClose();
     } catch (err) {
-      setError(err?.message || "Something went wrong. Please try again.");
+      setError(
+        typeof err === "string" ? err : err?.message || "Something went wrong.",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -201,11 +208,15 @@ export default function AuthModal({ isOpen, onClose, onLogin, onSignup }) {
                     ? "Sign in"
                     : "Create an account"}
               </button>
+              {/* {error && <div className="auth-modal__error">{error}</div>} */}
 
               <button
                 type="button"
                 className="auth-modal__switch"
-                onClick={() => setMode(mode === "login" ? "signup" : "login")}
+                onClick={() => {
+                  setError("");
+                  setMode(mode === "login" ? "signup" : "login");
+                }}
               >
                 {mode === "login" ? "Create an account" : "Back to login"}
               </button>

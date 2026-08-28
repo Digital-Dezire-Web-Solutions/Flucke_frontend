@@ -1,0 +1,48 @@
+.rl-breadcrumb {
+  --rl-ink: #1a1712;
+  --rl-ink-soft: #3d382f;
+  font-family: "Poppins", sans-serif;
+}
+
+.rl-breadcrumb__list {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+}
+
+.rl-breadcrumb__item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rl-breadcrumb__link,
+.rl-breadcrumb__current {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.rl-breadcrumb__link {
+  color: var(--rl-ink-soft);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+.rl-breadcrumb__link:hover {
+  color: var(--rl-ink);
+}
+
+.rl-breadcrumb__current {
+  color: var(--rl-ink);
+}
+
+.rl-breadcrumb__sep {
+  font-size: 11px;
+  color: #b6b0a2;
+}

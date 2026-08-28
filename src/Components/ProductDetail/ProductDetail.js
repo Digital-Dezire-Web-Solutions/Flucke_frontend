@@ -5,6 +5,12 @@ import product2 from "../../Assets/Products/product5.jpg";
 import product3 from "../../Assets/Products/product3.jpg";
 import product4 from "../../Assets/Products/prodbeforeafter.avif";
 import { LucideEye } from "lucide-react";
+import { FiShoppingCart } from "react-icons/fi";
+import { FaAmazon } from "react-icons/fa";
+import { FaPlus, FaMinus } from "react-icons/fa6";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+
 
 function StarIcon({ filled }) {
   return (
@@ -44,184 +50,80 @@ function ChevronIcon({ direction = "left" }) {
   );
 }
 
-function MinusIcon() {
-  return (
-    <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-      <path
-        d="M1 6.5H12"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-function PlusIcon() {
-  return (
-    <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-      <path
-        d="M6.5 1V12M1 6.5H12"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-function CartIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 20 19" fill="none">
-      <path
-        d="M1.5 1.5h2l1.8 11.4a1.8 1.8 0 0 0 1.8 1.5h8.2a1.8 1.8 0 0 0 1.78-1.5l1.2-7H4.9"
-        stroke="currentColor"
-        strokeWidth="1.4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <circle cx="8" cy="17.3" r="1.1" fill="currentColor" />
-      <circle cx="14.5" cy="17.3" r="1.1" fill="currentColor" />
-    </svg>
-  );
-}
-
-// --- Product catalog -------------------------------------------------
-// Each entry is a full product. The "Complete Lineup" cross-sell at the
-// bottom is derived from this catalog (every product except whichever
-// one is currently active), so clicking "View" on a lineup card swaps
-// the whole page over to that product in place, instead of navigating
-// to a different route.
-const PRODUCTS = {
-  "hyaluronic-serum": {
-    id: "hyaluronic-serum",
-    title: "HYALURONIC ACID ANTI-WRINKLE SERUM",
-    subtitle: "Target dullness, refine texture, and boost radiance.",
-    rating: 4.9,
-    reviewCount: 1245,
-    price: "₹99.00",
-    originalPrice: "₹123.75",
-    images: [product4, product1, product2, product3, product1, product2],
-    sizes: ["30ml / 1.06 fl oz"],
-    sections: [
-      {
-        id: "description",
-        title: "Description",
-        content:
-          "A chill pill for stressed skin—our lipid blend repairs the barrier, calms irritation, and restores a healthy glow. A chill pill for stressed skin—our lipid blend repairs the barrier, calms irritation, and restores a healthy glow.",
-      },
-      {
-        id: "benefits",
-        title: "Benefits",
-        content:
-          "Reduces redness, strengthens the moisture barrier, and leaves skin visibly calmer within days of consistent use.",
-      },
-      {
-        id: "how-to-use",
-        title: "How To Use",
-        content:
-          "Apply 2-3 drops to clean, damp skin morning and night. Follow with moisturizer and SPF during the day.",
-      },
-      {
-        id: "key-ingredients",
-        title: "Key Ingredients",
-        content:
-          "Ceramides, niacinamide, and centella asiatica work together to repair, soothe, and brighten the complexion.",
-      },
-    ],
-    lineupCard: { price: "₹22.00", originalPrice: "₹26.00" },
-  },
-  "retinol-serum": {
-    id: "retinol-serum",
-    title: "BRIGHTENING & REPAIRING RETINOL SERUM",
-    subtitle: "Fade dark spots, smooth texture, and renew skin overnight.",
-    rating: 4.8,
-    reviewCount: 932,
-    price: "₹42.00",
-    originalPrice: "₹76.00",
-    images: [product2, product1, product3, product4, product1],
-    sizes: ["30ml / 1.06 fl oz"],
-    sections: [
-      {
-        id: "description",
-        title: "Description",
-        content:
-          "A transformative retinol formula that helps reduce the appearance of wrinkles, improve skin texture, and restore natural radiance while you sleep.",
-      },
-      {
-        id: "benefits",
-        title: "Benefits",
-        content:
-          "Softens fine lines, evens out tone, and supports collagen renewal with consistent nightly use.",
-      },
-      {
-        id: "how-to-use",
-        title: "How To Use",
-        content:
-          "Apply a pea-sized amount to clean, dry skin at night. Start 2-3 times per week and build up tolerance. Always follow with SPF the next morning.",
-      },
-      {
-        id: "key-ingredients",
-        title: "Key Ingredients",
-        content:
-          "Encapsulated retinol, niacinamide, and squalane work together to renew, brighten, and comfort the skin barrier.",
-      },
-    ],
-    lineupCard: { price: "₹42.00", originalPrice: "₹76.00" },
-  },
-};
-
-const DEFAULT_PRODUCT_ID = "hyaluronic-serum";
-
 export default function ProductDetail({
-  productId = DEFAULT_PRODUCT_ID,
   lineupHeading = "Complete Lineup",
   lineupSubheading = "Check out other essentials in the Pear Rosaline Collection and build your full daily skincare ritual with ease.",
   onAddToCart,
 }) {
-  const [activeId, setActiveId] = useState(productId);
+  const navigate = useNavigate();
+  const { product, products } = useSelector((state) => state.products);
+  const activeProduct =
+    product ||
+    products.find((p) => p.isFeatured) ||
+    products[0];
+
   const [activeImage, setActiveImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [openSection, setOpenSection] = useState(null);
-
   const topRef = useRef(null);
+  const [selectedSize, setSelectedSize] = useState("");
 
-  const product = PRODUCTS[activeId] || PRODUCTS[DEFAULT_PRODUCT_ID];
-  const [selectedSize, setSelectedSize] = useState(product.sizes[0]);
-
-  // Whenever the active product changes (via "View" on a lineup card),
-  // reset the per-product UI state — gallery back to the first image,
-  // quantity back to 1, description accordion open — so nothing carries
-  // over from the previous product by accident.
   useEffect(() => {
     setActiveImage(0);
     setQuantity(1);
-    setSelectedSize(product.sizes[0]);
-    setOpenSection(product.sections[0]?.id ?? null);
-  }, [activeId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    if (activeProduct?.sizes?.length) {
+      setSelectedSize(activeProduct.sizes[0]);
+    }
+
+    setOpenSection("description");
+  }, [activeProduct]);
+
+  const totalImages = activeProduct?.images?.length || 1;
 
   const goPrev = () =>
-    setActiveImage((i) => (i - 1 + product.images.length) % product.images.length);
-  const goNext = () => setActiveImage((i) => (i + 1) % product.images.length);
+    setActiveImage((i) => (i - 1 + totalImages) % totalImages);
+
+  const goNext = () =>
+    setActiveImage((i) => (i + 1) % totalImages);
+
 
   const handleViewProduct = (id) => {
-    if (id === activeId) return;
-    setActiveId(id);
-    // Scroll the whole product-detail block back into view, so switching
-    // products from the lineup at the bottom of the page brings the user
-    // back up to see the newly-selected product.
-    topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    navigate(`/productdetail/${id}`);
   };
 
-  const lineup = Object.values(PRODUCTS)
-    .filter((p) => p.id !== activeId)
-    .map((p) => ({
-      id: p.id,
-      image: p.images[0],
-      title: p.title,
-      price: p.lineupCard.price,
-      originalPrice: p.lineupCard.originalPrice,
-    }));
+  const sections = [
+    {
+      id: "description",
+      title: "Description",
+      content: activeProduct?.description,
+    },
+    {
+      id: "benefits",
+      title: "Benefits",
+      content: activeProduct?.benefits?.join(", "),
+    },
+    {
+      id: "howToUse",
+      title: "How To Use",
+      content: activeProduct?.howToUse,
+    },
+    {
+      id: "ingredients",
+      title: "Ingredients",
+      content: activeProduct?.ingredients,
+    },
+  ];
+
+  const lineup = products.filter(
+    (item) =>
+      item._id !== activeProduct._id &&
+      item.category?._id === activeProduct.category?._id
+  );
+
+  if (!activeProduct) {
+    return <h2>Loading...</h2>;
+  }
 
   return (
     <section className="rl-pdp" ref={topRef}>
@@ -229,7 +131,7 @@ export default function ProductDetail({
         {/* Gallery */}
         <div className="rl-pdp__gallery">
           <div className="rl-pdp__thumbs">
-            {product.images.map((img, i) => (
+            {activeProduct?.images?.map((img, i) => (
               <button
                 key={img + i}
                 type="button"
@@ -244,7 +146,7 @@ export default function ProductDetail({
           <div className="rl-pdp__main-image">
             <div
               className="rl-pdp__main-image-inner"
-              style={{ backgroundImage: `url(${product.images[activeImage]})` }}
+              style={{ backgroundImage: `url(${activeProduct?.images?.[activeImage]})` }}
             />
 
             <div className="rl-pdp__nav">
@@ -270,29 +172,32 @@ export default function ProductDetail({
 
         {/* Info */}
         <div className="rl-pdp__info">
-          <h1 className="rl-pdp__title">{product.title}</h1>
-          <p className="rl-pdp__subtitle">{product.subtitle}</p>
+          <h1 className="rl-pdp__title">{activeProduct.name}</h1>
+          <p className="rl-pdp__subtitle">{activeProduct.description}</p>
 
           <div className="rl-pdp__rating">
             {Array.from({ length: 5 }).map((_, i) => (
-              <StarIcon key={i} filled={i < Math.round(product.rating)} />
+              <StarIcon key={i} filled={i < Math.round(activeProduct.rating)} />
             ))}
             <span className="rl-pdp__rating-text">
-              {product.rating}/5 ({product.reviewCount.toLocaleString()} reviews)
+              {activeProduct.rating}/5 ({activeProduct.totalReviews.toLocaleString()}{" "}
+              reviews)
             </span>
           </div>
 
           <div className="rl-pdp__price-row">
-            <span className="rl-pdp__price">{product.price}</span>
-            {product.originalPrice && (
-              <span className="rl-pdp__price-original">{product.originalPrice}</span>
+            <span className="rl-pdp__price">₹{activeProduct.salePrice || activeProduct.price}</span>
+            {activeProduct.salePrice > 0 && (
+              <span className="rl-pdp__price-original">
+                ₹{activeProduct.price}
+              </span>
             )}
           </div>
 
           <div className="rl-pdp__size">
             <span className="rl-pdp__label">Net Weight:</span>
             <div className="rl-pdp__size-options">
-              {product.sizes.map((s) => (
+              {activeProduct?.sizes.map((s) => (
                 <button
                   key={s}
                   type="button"
@@ -314,7 +219,7 @@ export default function ProductDetail({
                 onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                 aria-label="Decrease quantity"
               >
-                <MinusIcon />
+                <FaMinus />
               </button>
               <span className="rl-pdp__stepper-value">{quantity}</span>
               <button
@@ -323,25 +228,46 @@ export default function ProductDetail({
                 onClick={() => setQuantity((q) => q + 1)}
                 aria-label="Increase quantity"
               >
-                <PlusIcon />
+                <FaPlus />
               </button>
             </div>
           </div>
 
-          <button
-            type="button"
-            className="rl-pdp__add-btn"
-            onClick={() =>
-              onAddToCart &&
-              onAddToCart({ productId: product.id, size: selectedSize, quantity })
-            }
-          >
-            <CartIcon />
-            Add to Cart
-          </button>
+          <div className="product-detail-buttons">
+            <button
+              type="button"
+              className="rl-pdp__add-btn"
+              onClick={() =>
+                onAddToCart &&
+                onAddToCart({
+                  productId: product._id,
+                  size: selectedSize,
+                  quantity,
+                })
+              }
+            >
+              <FiShoppingCart />
+              Add to Cart
+            </button>
+            <button
+              type="button"
+              className="rl-pdp__add-btn"
+              onClick={() =>
+                onAddToCart &&
+                onAddToCart({
+                  productId: product._id,
+                  size: selectedSize,
+                  quantity,
+                })
+              }
+            >
+              <FaAmazon />
+              Buy on Amazon
+            </button>
+          </div>
 
           <div className="rl-pdp__accordion">
-            {product.sections.map((sec) => {
+            {sections.map((sec) => {
               const isOpen = openSection === sec.id;
               return (
                 <div className="rl-pdp__accordion-item" key={sec.id}>
@@ -353,7 +279,7 @@ export default function ProductDetail({
                   >
                     {sec.title}
                     <span className="rl-pdp__accordion-icon">
-                      {isOpen ? <MinusIcon /> : <PlusIcon />}
+                      {isOpen ? <FaMinus /> : <FaPlus />}
                     </span>
                   </button>
                   {isOpen && (
@@ -368,23 +294,25 @@ export default function ProductDetail({
 
       {/* Cross-sell */}
       <div className="rl-pdp__lineup">
-        <h2 className="rl-pdp__lineup-heading">{lineupHeading}</h2>
-        <p className="rl-pdp__lineup-subheading">{lineupSubheading}</p>
-
         <div className="rl-pdp__lineup-list">
+          <div >
+            <h2 className="rl-pdp__lineup-heading">{lineupHeading}</h2>
+            <p className="rl-pdp__lineup-subheading">{lineupSubheading}</p>
+          </div>
           {lineup.map((item) => (
-            <div className="rl-pdp__lineup-item" key={item.id}>
+            <div className="rl-pdp__lineup-item" key={item._id}>
               <div
                 className="rl-pdp__lineup-thumb"
-                style={{ backgroundImage: `url(${item.image})` }}
+                style={{ backgroundImage: `url(${item.images?.[0]})` }}
               />
               <div className="rl-pdp__lineup-text">
-                <span className="rl-pdp__lineup-title">{item.title}</span>
+                <span className="rl-pdp__lineup-title">{item.name}</span>
                 <span className="rl-pdp__lineup-price">
-                  {item.price}
-                  {item.originalPrice && (
+                  ₹{item.salePrice || item.price}
+
+                  {item.salePrice > 0 && (
                     <span className="rl-pdp__lineup-price-original">
-                      {item.originalPrice}
+                      ₹{item.price}
                     </span>
                   )}
                 </span>
@@ -392,7 +320,7 @@ export default function ProductDetail({
               <button
                 type="button"
                 className="rl-pdp__lineup-cart-btn"
-                onClick={() => handleViewProduct(item.id)}
+                onClick={() => handleViewProduct(item._id)}
               >
                 <LucideEye />
                 View

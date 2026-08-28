@@ -1,0 +1,286 @@
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.status-pending {
+  background: #f39c12;
+}
+
+.status-confirmed {
+  background: #3498db;
+}
+
+.status-packed {
+  background: #8e44ad;
+}
+
+.status-shipped {
+  background: #2ecc71;
+}
+
+.status-delivered {
+  background: #27ae60;
+}
+
+.status-cancelled {
+  background: #e74c3c;
+}
+
+.admin-table select {
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  outline: none;
+}
+/* ===========================
+   Table Wrapper
+=========================== */
+
+.admin-table-wrapper {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+}
+
+/* ===========================
+   Header
+=========================== */
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 22px;
+  gap: 15px;
+}
+
+.table-header h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: #222;
+}
+
+.table-header input {
+  width: 300px;
+  max-width: 100%;
+  padding: 11px 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  outline: none;
+  font-size: 14px;
+}
+
+.table-header input:focus {
+  border-color: #111;
+}
+
+/* ===========================
+   Table
+=========================== */
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-table thead {
+  background: #f8f8f8;
+}
+
+.admin-table th {
+  padding: 15px;
+  text-align: left;
+  font-size: 14px;
+  color: #444;
+  font-weight: 600;
+}
+
+.admin-table td {
+  padding: 16px 15px;
+  border-top: 1px solid #eee;
+  font-size: 14px;
+  color: #555;
+}
+
+.admin-table tbody tr:hover {
+  background: #fafafa;
+}
+
+/* ===========================
+   Buttons
+=========================== */
+
+.edit-btn,
+.delete-btn,
+.save-btn {
+  border: none;
+  cursor: pointer;
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-size: 13px;
+  transition: 0.25s;
+}
+
+.edit-btn {
+  background: #1976d2;
+  color: #fff;
+  margin-right: 8px;
+}
+
+.edit-btn:hover {
+  background: #125ca4;
+}
+
+.delete-btn {
+  background: #d32f2f;
+  color: #fff;
+}
+
+.delete-btn:hover {
+  background: #b71c1c;
+}
+
+.save-btn {
+  background: #111;
+  color: white;
+}
+
+.save-btn:hover {
+  background: #000;
+}
+
+/* ===========================
+   Modal
+=========================== */
+
+.admin-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.admin-modal {
+  width: 550px;
+  max-width: 95%;
+  background: white;
+  border-radius: 12px;
+  padding: 28px;
+}
+
+.admin-modal h3 {
+  margin: 0 0 25px;
+  font-size: 24px;
+  color: #222;
+}
+
+.admin-modal input,
+.admin-modal select {
+  width: 100%;
+  margin-bottom: 15px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+  outline: none;
+}
+
+.admin-modal input:focus,
+.admin-modal select:focus {
+  border-color: #111;
+}
+
+.admin-modal label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 0;
+  font-size: 14px;
+  color: #444;
+}
+
+.admin-modal input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.modal-actions button {
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+
+.modal-actions button:first-child {
+  background: #ececec;
+}
+
+.modal-actions button:first-child:hover {
+  background: #ddd;
+}
+
+/* ===========================
+   Status Badges
+=========================== */
+
+.badge {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 30px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.badge.green {
+  background: #e8f7ee;
+  color: #0f8d43;
+}
+
+.badge.red {
+  background: #ffe8e8;
+  color: #d32f2f;
+}
+
+.badge.blue {
+  background: #e8f2ff;
+  color: #1976d2;
+}
+
+/* ===========================
+   Responsive
+=========================== */
+
+@media (max-width: 992px) {
+  .admin-table-wrapper {
+    overflow-x: auto;
+  }
+
+  .admin-table {
+    min-width: 950px;
+  }
+
+  .table-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .table-header input {
+    width: 100%;
+  }
+}

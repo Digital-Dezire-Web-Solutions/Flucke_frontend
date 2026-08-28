@@ -1,23 +1,47 @@
 import React, { useState } from "react";
+import { useSelector } from "react-redux";
 import "./Checkout.css";
 import ProductData from "../../Data/ProductData";
 
-
 const EXPRESS_METHODS = [
-  { id: "paypal", label: "PayPal", className: "rl-checkout__express-btn--paypal" },
-  { id: "shoppay", label: "Shop Pay", className: "rl-checkout__express-btn--shoppay" },
-  { id: "applepay", label: "Apple Pay", className: "rl-checkout__express-btn--applepay" },
-  { id: "googlepay", label: "G Pay", className: "rl-checkout__express-btn--googlepay" },
+  {
+    id: "paypal",
+    label: "PayPal",
+    className: "rl-checkout__express-btn--paypal",
+  },
+  {
+    id: "shoppay",
+    label: "Shop Pay",
+    className: "rl-checkout__express-btn--shoppay",
+  },
+  {
+    id: "applepay",
+    label: "Apple Pay",
+    className: "rl-checkout__express-btn--applepay",
+  },
+  {
+    id: "googlepay",
+    label: "G Pay",
+    className: "rl-checkout__express-btn--googlepay",
+  },
 ];
 
-const FOOTER_LINKS = ["Refund policy", "Shipping", "Privacy policy", "Terms of service", "Legal notice", "Contact"];
+const FOOTER_LINKS = [
+  "Refund policy",
+  "Shipping",
+  "Privacy policy",
+  "Terms of service",
+  "Legal notice",
+  "Contact",
+];
 
-export default function Checkout({ items = ProductData, taxAmount = 2.0, onPlaceOrder }) {
+export default function Checkout({ taxAmount = 2.0, onPlaceOrder }) {
+  const cartItems = useSelector((state) => state.cart.cartItems);
+
+  const { appliedCoupon } = useSelector((state) => state.coupons);
   const [deliveryMethod, setDeliveryMethod] = useState("ship");
   const [paymentMethod, setPaymentMethod] = useState("card");
   const [billingSame, setBillingSame] = useState(true);
-  const [discountCode, setDiscountCode] = useState("");
-  const [appliedDiscount, setAppliedDiscount] = useState(40);
   const [form, setForm] = useState({
     email: "",
     firstName: "",
@@ -34,42 +58,34 @@ export default function Checkout({ items = ProductData, taxAmount = 2.0, onPlace
     cvv: "",
   });
 
-  const handleField = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
+  const handleField = (field) => (e) =>
+    setForm((f) => ({ ...f, [field]: e.target.value }));
 
-  const subtotal = items.reduce((sum, it) => sum + it.price * it.quantity, 0);
-  const itemDiscount = items.reduce(
-    (sum, it) => sum + ((it.originalPrice || it.price) - it.price) * it.quantity,
-    0
+  const subtotal = cartItems.reduce(
+    (sum, item) => sum + (item.salePrice || item.price) * item.quantity,
+    0,
   );
-  // subtotal already reflects each item's sale price; appliedDiscount is
-  // the separate discount-code amount subtracted at checkout.
-  const grandTotal = subtotal - appliedDiscount + taxAmount;
 
-  const handleApplyDiscount = () => {
-    if (discountCode.trim()) setAppliedDiscount((d) => d || 5);
-  };
+  const itemDiscount = cartItems.reduce(
+    (sum, item) =>
+      sum + (item.price - (item.salePrice || item.price)) * item.quantity,
+    0,
+  );
+
+  const couponDiscount = appliedCoupon?.discount || 0;
+
+  const grandTotal = subtotal - couponDiscount + taxAmount;
 
   const handlePlaceOrder = (e) => {
     e.preventDefault();
-    onPlaceOrder && onPlaceOrder({ ...form, deliveryMethod, paymentMethod, billingSame });
+    onPlaceOrder &&
+      onPlaceOrder({ ...form, deliveryMethod, paymentMethod, billingSame });
   };
 
   return (
     <div className="rl-checkout">
       <form className="rl-checkout__main" onSubmit={handlePlaceOrder}>
         <h2 className="rl-checkout__express-heading">Express checkout</h2>
-
-        {/* <div className="rl-checkout__express-row">
-          {EXPRESS_METHODS.map((m) => (
-            <button type="button" key={m.id} className={`rl-checkout__express-btn ${m.className}`}>
-              {m.label}
-            </button>
-          ))}
-        </div>
-
-        <div className="rl-checkout__divider">
-          <span>OR</span>
-        </div> */}
 
         <section className="rl-checkout__section">
           <div className="rl-checkout__section-header">
@@ -93,7 +109,6 @@ export default function Checkout({ items = ProductData, taxAmount = 2.0, onPlace
           </label>
         </section>
 
-
         <section className="rl-checkout__section">
           <h3>Delivery</h3>
           <div className="rl-checkout__grid-2">
@@ -116,16 +131,35 @@ export default function Checkout({ items = ProductData, taxAmount = 2.0, onPlace
             value={form.phone}
             onChange={handleField("phone")}
           />
-          <select className="rl-checkout__input rl-checkout__select" value={form.country} onChange={handleField("country")}>
+          <select
+            className="rl-checkout__input rl-checkout__select"
+            value={form.country}
+            onChange={handleField("country")}
+          >
             <option value="">Country</option>
             <option value="IN">India</option>
             <option value="US">United States</option>
             <option value="UK">United Kingdom</option>
           </select>
           <div className="rl-checkout__grid-3">
-            <input className="rl-checkout__input" placeholder="City" value={form.city} onChange={handleField("city")} />
-            <input className="rl-checkout__input" placeholder="State" value={form.state} onChange={handleField("state")} />
-            <input className="rl-checkout__input" placeholder="ZIP Code" value={form.zip} onChange={handleField("zip")} />
+            <input
+              className="rl-checkout__input"
+              placeholder="City"
+              value={form.city}
+              onChange={handleField("city")}
+            />
+            <input
+              className="rl-checkout__input"
+              placeholder="State"
+              value={form.state}
+              onChange={handleField("state")}
+            />
+            <input
+              className="rl-checkout__input"
+              placeholder="ZIP Code"
+              value={form.zip}
+              onChange={handleField("zip")}
+            />
           </div>
           <input
             className="rl-checkout__input"
@@ -141,7 +175,9 @@ export default function Checkout({ items = ProductData, taxAmount = 2.0, onPlace
 
         <section className="rl-checkout__section">
           <h3>Shipping methods</h3>
-          <div className="rl-checkout__placeholder-box">Enter your shipping address to view available shipping methods</div>
+          <div className="rl-checkout__placeholder-box">
+            Enter your shipping address to view available shipping methods
+          </div>
         </section>
 
         {/* <section className="rl-checkout__section">
@@ -205,7 +241,9 @@ export default function Checkout({ items = ProductData, taxAmount = 2.0, onPlace
             className={`rl-checkout__radio-row rl-checkout__payment-option ${billingSame ? "rl-checkout__payment-option--active" : ""}`}
             onClick={() => setBillingSame(true)}
           >
-            <span className={`rl-checkout__radio ${billingSame ? "rl-checkout__radio--checked" : ""}`} />
+            <span
+              className={`rl-checkout__radio ${billingSame ? "rl-checkout__radio--checked" : ""}`}
+            />
             Same as shipping address
           </button>
           <button
@@ -213,7 +251,9 @@ export default function Checkout({ items = ProductData, taxAmount = 2.0, onPlace
             className={`rl-checkout__radio-row rl-checkout__payment-option ${!billingSame ? "rl-checkout__payment-option--active" : ""}`}
             onClick={() => setBillingSame(false)}
           >
-            <span className={`rl-checkout__radio ${!billingSame ? "rl-checkout__radio--checked" : ""}`} />
+            <span
+              className={`rl-checkout__radio ${!billingSame ? "rl-checkout__radio--checked" : ""}`}
+            />
             Use a different billing address
           </button>
         </section>
@@ -232,9 +272,12 @@ export default function Checkout({ items = ProductData, taxAmount = 2.0, onPlace
       </form>
 
       <aside className="rl-checkout__summary">
-        {items.map((item, i) => (
+        {cartItems.map((item, i) => (
           <div className="rl-checkout__summary-item" key={item.id}>
-            <div className="rl-checkout__summary-thumb" style={{ backgroundImage: `url(${item.image})` }}>
+            <div
+              className="rl-checkout__summary-thumb"
+              style={{ backgroundImage: `url(${item.image})` }}
+            >
               <span className="rl-checkout__summary-qty-badge">{i + 1}</span>
             </div>
             <div className="rl-checkout__summary-info">
@@ -243,30 +286,32 @@ export default function Checkout({ items = ProductData, taxAmount = 2.0, onPlace
             </div>
             <div className="rl-checkout__summary-price">
               {item.originalPrice && (
-                <span className="rl-checkout__summary-price-original">₹{item.originalPrice.toFixed(2)}</span>
+                <span className="rl-checkout__summary-price-original">
+                  ₹{item.originalPrice.toFixed(2)}
+                </span>
               )}
-              <span className={item.originalPrice ? "rl-checkout__summary-price-sale" : ""}>
+              <span
+                className={
+                  item.originalPrice ? "rl-checkout__summary-price-sale" : ""
+                }
+              >
                 ₹{(item.price * item.quantity).toFixed(2)}
               </span>
             </div>
           </div>
         ))}
 
-        <div className="rl-checkout__discount-row">
-          <input
-            className="rl-checkout__input"
-            placeholder="Enter discount code here"
-            value={discountCode}
-            onChange={(e) => setDiscountCode(e.target.value)}
-          />
-          <button type="button" className="rl-checkout__apply-btn" onClick={handleApplyDiscount}>
-            Apply
-          </button>
-        </div>
+        {appliedCoupon && (
+          <div className="rl-checkout__discount-row">
+            <strong>Coupon Applied :{appliedCoupon.coupon.code}</strong>
+          </div>
+        )}
 
         <div className="rl-checkout__totals">
           <div className="rl-checkout__totals-row">
-            <span>Subtotal ({items.reduce((s, it) => s + it.quantity, 0)} items)</span>
+            <span>
+              Subtotal ({cartItems.reduce((s, it) => s + it.quantity, 0)} items)
+            </span>
             <span>₹{subtotal.toFixed(2)}</span>
           </div>
           <div className="rl-checkout__totals-row">
@@ -275,10 +320,15 @@ export default function Checkout({ items = ProductData, taxAmount = 2.0, onPlace
           </div>
           <div className="rl-checkout__totals-row">
             <span>Discount</span>
-            <span className="rl-checkout__discount-value">-₹{appliedDiscount.toFixed(2)}</span>
+            <span className="rl-checkout__discount-value">
+              -₹{couponDiscount.toFixed(2)}
+            </span>
           </div>
           <p className="rl-checkout__discount-breakdown">
-            Discount on items: -₹{itemDiscount.toFixed(2)} &nbsp; Discount code: -₹{(appliedDiscount).toFixed(2)}
+            Discount on items: -₹{itemDiscount.toFixed(2)}
+            Coupon:
+            {appliedCoupon?.coupon?.code || "None"}
+            (-₹{couponDiscount.toFixed(2)})
           </p>
         </div>
 
@@ -286,7 +336,9 @@ export default function Checkout({ items = ProductData, taxAmount = 2.0, onPlace
           <span>Total</span>
           <span>₹{grandTotal.toFixed(2)}</span>
         </div>
-        <p className="rl-checkout__tax-note">Including ₹{taxAmount.toFixed(2)} in taxes</p>
+        <p className="rl-checkout__tax-note">
+          Including ₹{taxAmount.toFixed(2)} in taxes
+        </p>
       </aside>
     </div>
   );

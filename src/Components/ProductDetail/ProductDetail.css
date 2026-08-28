@@ -6,6 +6,7 @@
   --rl-muted: #6f6a63;
   --rl-border: #e5e1d6;
   --rl-sale: #c0392b;
+  --rl-card-border: #ece7dc;
   background: #ffffff;
   padding: 5rem 40px;
   font-family: "Poppins", sans-serif;
@@ -223,7 +224,11 @@
   min-width: 12px;
   text-align: center;
 }
-
+.product-detail-buttons{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 .rl-pdp__add-btn {
   width: 100%;
   display: inline-flex;
@@ -312,13 +317,14 @@
   color: var(--rl-muted);
   max-width: 560px;
   line-height: 1.6;
-  margin: 0 0 28px;
+  margin: 0;
 }
 
 .rl-pdp__lineup-list {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 32px;
+  align-items: center;
 }
 
 .rl-pdp__lineup-item {
@@ -328,6 +334,7 @@
   background-color: var(--rl-cream);
   padding: 1rem;
   border-radius: 12px;
+  border: 1px solid var(--rl-card-border);
 }
 
 .rl-pdp__lineup-thumb {

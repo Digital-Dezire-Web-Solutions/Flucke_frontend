@@ -5,7 +5,7 @@ const ProductData= [
     {
     id: "aha-serum-30",
     image: product1,
-    title: "AHA Rosaline Serum 10% - 30ml",
+    title: "HYALURONIC ACID ANTI-WRINKLE SERUM",
     size: "30ml",
     price: 32,
     originalPrice: 40,
@@ -14,18 +14,9 @@ const ProductData= [
   {
     id: "hydra-moisturizer",
     image: product2,
-    title: "Hydra Barrier Moisturizer",
+    title: "BRIGHTENING & REPAIRING RETINOL SERUM",
     size: "30ml",
     price: 40,
-    quantity: 1,
-  },
-  {
-    id: "gentle-cleanser",
-    image: product3,
-    title: "Gentle Foam Cleanser",
-    size: "30ml",
-    price: 21,
-    originalPrice: 40,
     quantity: 1,
   },
 ]

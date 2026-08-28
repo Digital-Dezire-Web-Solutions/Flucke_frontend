@@ -105,8 +105,18 @@ const TRUST_BADGES = [
   { icon: StarIconOutline, title: "10,000+ Reviews", subtitle: "Trusted by glow-seekers worldwide." },
 ];
 
-const SHOP_LINKS = ["Shop All", "Best Sellers", "New Arrivals", "Bundles & Savings"];
-const HELP_LINKS = ["Contact Us", "Shipping & Returns", "FAQ", "Privacy Policy", "Terms & Conditions"];
+const SHOP_LINKS = [
+  { title: "Home", link: "/" },
+  { title: "Product", link: "product" },
+  { title: "About", link: "about" },
+  // { title: "Contact", link: "contact" },
+];
+const HELP_LINKS = [
+  { title: "Contact Us", link: "contact" },
+  { title: "Shipping & Returns", link: "shipping-&-return" },
+  { title: "Privacy Policy", link: "privacy-policy" },
+  { title: "Terms & Conditions", link: "term-&-condition" },
+];
 const SOCIALS = ["facebook", "instagram", "twitter", "youtube", "linkedin"];
 
 export default function Footer({
@@ -184,7 +194,7 @@ export default function Footer({
             <ul className="rl-footer__link-list">
               {SHOP_LINKS.map((l) => (
                 <li key={l}>
-                  <a href="#!">{l}</a>
+                  <Link to={l.link}>{l.title}</Link>
                 </li>
               ))}
             </ul>
@@ -195,7 +205,7 @@ export default function Footer({
             <ul className="rl-footer__link-list">
               {HELP_LINKS.map((l) => (
                 <li key={l}>
-                  <a href="#!">{l}</a>
+                  <Link to={l.link}>{l.title}</Link>
                 </li>
               ))}
             </ul>

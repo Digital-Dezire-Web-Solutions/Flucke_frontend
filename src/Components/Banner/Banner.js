@@ -8,7 +8,7 @@ export default function Banner({
   eyebrow = "High-Performance Skincare",
   headline = ["Serious Care", "Sleek Results"],
   subheading = "Potent actives, clean formulas, clinically proven radiance.",
-  ctaLabel = "Shop From Amazon",
+  ctaLabel = "Shop on Amazon",
   ctaHref = "#!",
   videoUrl = bgVideo,
   posterUrl = posterImage, // shown while the video loads / if it fails to play

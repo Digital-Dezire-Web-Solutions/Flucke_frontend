@@ -1,6 +1,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@400;500;600&display=swap");
 
 .rl-cart-page {
+   --rl-lime: #dcec9a;
   --rl-ink: #17140f;
   --rl-muted: #7a746a;
   --rl-border: #e8e3d9;

@@ -1,12 +1,18 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "./ProductGrid.css";
-import product1 from "../../Assets/Products/product4.jpg"
-import product2 from "../../Assets/Products/product5.jpg"
-import product3 from "../../Assets/Products/product3.jpg"
+import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { getProducts } from "../../Redux/features/products/productSlice";
+import { addToCart } from "../../Redux/features/cart/cartSlice";
 
 function StarIcon({ filled }) {
   return (
-    <svg width="14" height="14" viewBox="0 0 20 20" fill={filled ? "currentColor" : "none"}>
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 20 20"
+      fill={filled ? "currentColor" : "none"}
+    >
       <path
         d="M10 1.5l2.6 5.6 6.1.7-4.5 4.2 1.2 6-5.4-3-5.4 3 1.2-6L1.3 7.8l6.1-.7L10 1.5Z"
         stroke="currentColor"
@@ -47,8 +53,20 @@ function HeartIcon() {
 function SwapIcon() {
   return (
     <svg width="17" height="17" viewBox="0 0 20 20" fill="none">
-      <path d="M2 7h13M15 7l-3-3M15 7l-3 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M18 13H5M5 13l3-3M5 13l3 3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M2 7h13M15 7l-3-3M15 7l-3 3"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M18 13H5M5 13l3-3M5 13l3 3"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
@@ -78,54 +96,26 @@ function SparkleIcon() {
   );
 }
 
-const DEFAULT_PRODUCTS = [
-  {
-    image: product1,
-    badge: null,
-    rating: 5,
-    reviewCount: 12,
-    title: "Serum for Oily Skin",
-    subtitle: "Niacinamide 10% + Zinc 1% / 30 ml",
-    price: "₹260.00",
-  },
-  {
-    image: product2,
-    badge: "Top Rated",
-    rating: 5,
-    reviewCount: 12,
-    title: "Great Skin Instant Rosaline Serum",
-    subtitle: "Fragrance-Free / 50 ml",
-    price: "₹260.00",
-  },
-//   {
-//     image: product3,
-//     badge: "Top Rated",
-//     rating: 5,
-//     reviewCount: 12,
-//     title: "The Base Face Milk Essence",
-//     subtitle: "Fragrance-Free / 100 ml",
-//     price: "$58.00",
-//   },
-//   {
-//     image: product1,
-//     badge: "Top Rated",
-//     rating: 5,
-//     reviewCount: 12,
-//     title: "Bronzing Drops with Peptides",
-//     subtitle: "Fragrance-Free / 30 ml",
-//     price: "$36.00",
-//   },
-];
-
 export default function ProductGrid({
   eyebrow = "Your Skin's Favorites",
   heading = "Best-Selling Rosaline Picks",
   subheading = "Discover the skincare staples our community loves the most, proven formulas, radiant results.",
-  products = DEFAULT_PRODUCTS,
   viewAllLabel = "View All Products",
   viewAllHref = "#!",
   onAddToCart,
 }) {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { products } = useSelector((state) => state.products);
+  useEffect(() => {
+    dispatch(getProducts());
+  }, [dispatch]);
+
+  const handleAddToCart = (product) => {
+    dispatch(addToCart(product));
+  };
+
+  // console.log(products, "products");
   return (
     <section className="rl-products">
       <div className="rl-products__intro">
@@ -139,9 +129,14 @@ export default function ProductGrid({
 
       <div className="rl-products__grid">
         {products.map((p) => (
-          <article className="rl-products__card" key={p.title}>
+          <article className="rl-products__card" key={p._id}>
             <div className="rl-products__media">
-              <div className="rl-products__image" style={{ backgroundImage: `url(${p.image})` }} />
+              <div
+                className="rl-products__image"
+                style={{
+                  backgroundImage: `url(${p.images?.[0] || "/images/no-image.png"})`,
+                }}
+              />
 
               {p.badge && (
                 <span className="rl-products__badge">
@@ -151,30 +146,53 @@ export default function ProductGrid({
               )}
 
               <div className="rl-products__actions">
-                <button type="button" aria-label="Quick view" className="rl-products__action-btn">
+                <button
+                  type="button"
+                  aria-label="Quick view"
+                  className="rl-products__action-btn"
+                  onClick={() => navigate(`/productdetail/${p._id}`)}
+                >
                   <EyeIcon />
                 </button>
-                <button type="button" aria-label="Add to wishlist" className="rl-products__action-btn">
+                <button
+                  type="button"
+                  aria-label="Add to wishlist"
+                  className="rl-products__action-btn"
+                >
                   <HeartIcon />
                 </button>
-                <button type="button" aria-label="Compare" className="rl-products__action-btn">
-                  <SwapIcon />
-                </button>
               </div>
-            <div className="rl-products__rating">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <StarIcon key={i} filled={i < p.rating} />
-              ))}
-              <span className="rl-products__rating-count">({p.reviewCount})</span>
+              <div className="rl-products__rating">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <StarIcon key={i} filled={i < Math.round(p.rating)} />
+                ))}
+                <span className="rl-products__rating-count">
+                  ({p.totalReviews})
+                </span>
+              </div>
             </div>
-            </div>
 
+            <h3 className="rl-products__title">{p.name}</h3>
+            <p className="rl-products__product-subtitle">{p.ingredients}</p>
+            <p className="rl-products__price">
+              {p.salePrice > 0 && (
+                <span
+                  style={{
+                    textDecoration: "line-through",
+                    color: "#999",
+                    marginRight: "8px",
+                  }}
+                >
+                  ₹{p.price}
+                </span>
+              )}
+              ₹{p.salePrice > 0 ? p.salePrice : p.price}
+            </p>
 
-            <h3 className="rl-products__title">{p.title}</h3>
-            <p className="rl-products__product-subtitle">{p.subtitle}</p>
-            <p className="rl-products__price">{p.price}</p>
-
-            <button type="button" className="rl-products__add-btn" onClick={() => onAddToCart && onAddToCart(p)}>
+            <button
+              className="rl-products__add-btn"
+              onClick={() => handleAddToCart(p)}
+            >
               Add to Cart
             </button>
           </article>

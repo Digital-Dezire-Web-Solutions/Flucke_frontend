@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from "react";
 import "./Cart.css";
 import { useNavigate } from "react-router-dom";
-import ProductData from "../../Data/ProductData";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  removeFromCart,
+  updateCartQuantity,
+} from "../../Redux/features/cart/cartSlice";
 
 function CloseIcon() {
   return (
@@ -115,11 +119,10 @@ export default function Cart({
   onCheckout,
   onViewCart,
 }) {
-    const navigate = useNavigate();
-  const [internalItems, setInternalItems] = useState(items || ProductData);
-  useEffect(() => {
-    if (items) setInternalItems(items);
-  }, [items]);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const cartItems = useSelector((state) => state.cart.cartItems);
 
   useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : "";
@@ -129,25 +132,21 @@ export default function Cart({
   }, [isOpen]);
 
   const updateQuantity = (id, delta) => {
-    setInternalItems((list) =>
-      list.map((it) =>
-        it.id === id
-          ? { ...it, quantity: Math.max(1, it.quantity + delta) }
-          : it,
-      ),
+    dispatch(
+      updateCartQuantity({
+        id,
+        delta,
+      }),
     );
   };
 
-  const removeItem = (id) => {
-    setInternalItems((list) => list.filter((it) => it.id !== id));
-  };
+  const subtotal = cartItems.reduce(
+    (sum, item) => sum + (item.salePrice || item.price) * item.quantity,
 
-  const subtotal = internalItems.reduce(
-    (sum, it) => sum + it.price * it.quantity,
     0,
   );
-  const originalSubtotal = internalItems.reduce(
-    (sum, it) => sum + (it.originalPrice || it.price) * it.quantity,
+  const originalSubtotal = cartItems.reduce(
+    (sum, item) => sum + item.price * item.quantity,
     0,
   );
   const saved = originalSubtotal - subtotal;
@@ -174,6 +173,10 @@ export default function Cart({
     }
   };
 
+  const removeItem = (id) => {
+    dispatch(removeFromCart(id));
+  };
+
   return (
     <>
       <div
@@ -187,7 +190,7 @@ export default function Cart({
         aria-hidden={!isOpen}
       >
         <div className="rl-cart__header">
-          <h2 className="rl-cart__title">Your Cart ({internalItems.length})</h2>
+          <h2 className="rl-cart__title">Your Cart ({cartItems.length})</h2>
           <button
             type="button"
             className="rl-cart__close"
@@ -198,7 +201,7 @@ export default function Cart({
           </button>
         </div>
 
-        <div className="rl-cart__shipping">
+        {/* <div className="rl-cart__shipping">
           {remainingForFreeShipping > 0 ? (
             <p className="rl-cart__shipping-text">
               Spend ₹{remainingForFreeShipping.toFixed(2)} more for free
@@ -215,34 +218,32 @@ export default function Cart({
               style={{ width: `${progressPct}%` }}
             />
           </div>
-        </div>
+        </div> */}
 
         <div className="rl-cart__items">
-          {internalItems.map((item) => (
-            <div className="rl-cart__item" key={item.id}>
+          {cartItems.map((item) => (
+            <div className="rl-cart__item" key={item._id}>
               <div
                 className="rl-cart__item-thumb"
-                style={{ backgroundImage: `url(${item.image})` }}
+                style={{ backgroundImage: `url(${item?.images?.[0]})` }}
               />
 
               <div className="rl-cart__item-body">
                 <div className="rl-cart__item-top">
                   <div>
-                    <h3 className="rl-cart__item-title">{item.title}</h3>
+                    <h3 className="rl-cart__item-title">{item.name}</h3>
                     <p className="rl-cart__item-size">Size: {item.size}</p>
                   </div>
                   <div className="rl-cart__item-price">
-                    {item.originalPrice && (
+                    {item.salePrice > 0 && (
                       <span className="rl-cart__item-price-original">
-                        ₹{item.originalPrice.toFixed(2)}
+                        ₹{item.price.toFixed(2)}
                       </span>
                     )}
                     <span
-                      className={
-                        item.originalPrice ? "rl-cart__item-price-sale" : ""
-                      }
+                      className={item.price ? "rl-cart__item-price-sale" : ""}
                     >
-                      ₹{item.price.toFixed(2)}
+                      ₹{(item.salePrice || item.price).toFixed(2)}
                     </span>
                   </div>
                 </div>
@@ -251,7 +252,7 @@ export default function Cart({
                   <div className="rl-cart__stepper">
                     <button
                       type="button"
-                      onClick={() => updateQuantity(item.id, -1)}
+                      onClick={() => updateQuantity(item._id, -1)}
                       aria-label="Decrease quantity"
                     >
                       <MinusIcon />
@@ -259,7 +260,7 @@ export default function Cart({
                     <span>{item.quantity}</span>
                     <button
                       type="button"
-                      onClick={() => updateQuantity(item.id, 1)}
+                      onClick={() => updateQuantity(item._id, 1)}
                       aria-label="Increase quantity"
                     >
                       <PlusIcon />
@@ -268,8 +269,8 @@ export default function Cart({
                   <button
                     type="button"
                     className="rl-cart__remove"
-                    onClick={() => removeItem(item.id)}
-                    aria-label={`Remove ${item.title}`}
+                    onClick={() => removeItem(item._id)}
+                    aria-label={`Remove ${item.name}`}
                   >
                     <TrashIcon />
                   </button>
@@ -278,7 +279,7 @@ export default function Cart({
             </div>
           ))}
 
-          {internalItems.length === 0 && (
+          {cartItems.length === 0 && (
             <p className="rl-cart__empty">Your cart is empty.</p>
           )}
         </div>

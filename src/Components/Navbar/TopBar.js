@@ -57,15 +57,32 @@ const TopBar = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const SOCIALS = ["facebook", "instagram", "twitter", "youtube", "linkedin"];
+  const SOCIALS = [
+    {
+      title: "facebook",
+      link: "https://www.facebook.com/share/198s98zUAS/?mibextid=wwXIfr"
+    },
+    {
+      title: "instagram",
+      link: "https://www.instagram.com/flucke_luxuryskincare?igsh=MXM3bGhycjlrbDl4Nw=="
+    },
+    {
+      title: "twitter",
+      link: ""
+    },
+    {
+      title: "youtube",
+      link: ""
+    },
+  ];
   return (
     <div className='topbar'>
       <div className="rl-footer__bottom">
         <div className="rl-footer__socials">
           {SOCIALS.map((s) => (
-            <a href="#!" key={s} className="rl-footer__social-btn" aria-label={s}>
-              <SocialIcon type={s} />
-            </a>
+            <Link to={s.link} key={s} className="rl-footer__social-btn" aria-label={s}>
+              <SocialIcon type={s.title} />
+            </Link>
           ))}
         </div>
         <div className="offer-wrapper">

@@ -7,7 +7,7 @@
   --rl-muted: #918c7d;
   font-family: "Poppins", sans-serif;
   color: var(--rl-ink-soft);
-      margin-top: 4rem;
+  margin-top: 4rem;
 }
 
 /* ---------- Hero ---------- */
@@ -46,7 +46,7 @@
 .rl-account__body {
   display: grid;
   grid-template-columns: 260px 1fr;
-  gap: 32px;
+  gap: 1rem;
   padding: 40px 48px 90px;
   align-items: start;
 }
@@ -74,7 +74,9 @@
   font-family: inherit;
   font-size: 14.5px;
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
 }
 
 .rl-account__nav-item:hover {
@@ -129,6 +131,11 @@
   flex-direction: column;
   gap: 24px;
   min-width: 0;
+  overflow: auto;
+  height: 85vh;
+  /* border: 1px solid var(--rl-line); */
+  padding: 10px;
+  border-radius: 10px;
 }
 
 .rl-card {
@@ -398,7 +405,10 @@
   letter-spacing: 0.4px;
   text-transform: uppercase;
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
 }
 
 .rl-btn--dark {

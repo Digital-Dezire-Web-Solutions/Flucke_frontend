@@ -3,7 +3,7 @@ import "./Policy.css";
 import Breadcrumb from "../../Components/Breadcrumb/Breadcrumb";
 import LuxuryCta from "../../Components/LuxuryCta/LuxuryCta";
 
-const LAST_UPDATED = "December 31, 2025";
+const LAST_UPDATED = "26 August 2026";
 
 const SECTIONS = [
   {

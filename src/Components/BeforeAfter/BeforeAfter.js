@@ -1,29 +1,29 @@
 import React, { useCallback, useRef, useState } from "react";
 import "./BeforeAfter.css";
-import before from "../../Assets/BeforeAfter/beforeafter1.jpg";
-import after from "../../Assets/BeforeAfter/beforeafter1.jpg";
+import before from "../../Assets/BeforeAfter//before.jpg";
+import after from "../../Assets/BeforeAfter/after.jpg";
 
 const DEFAULT_CALLOUTS = [
-//   {
-//     side: "before",
-//     eyebrow: "Uneven Skin",
-//     label: "Dark Spots",
-//     top: 39,
-//     boxLeft: 29,
-//     boxWidth: 10,
-//     boxHeight: 16,
-//     textAlign: "right",
-//   },
-//   {
-//     side: "after",
-//     eyebrow: "Refined Texture",
-//     label: "Youthful Glow",
-//     top: 49,
-//     boxLeft: 58,
-//     boxWidth: 8,
-//     boxHeight: 13,
-//     textAlign: "left",
-//   },
+  {
+    side: "before",
+    eyebrow: "Uneven Skin",
+    label: "Dark Spots",
+    top: 39,
+    boxLeft: 29,
+    boxWidth: 10,
+    boxHeight: 16,
+    textAlign: "right",
+  },
+  {
+    side: "after",
+    eyebrow: "Refined Texture",
+    label: "Youthful Glow",
+    top: 49,
+    boxLeft: 58,
+    boxWidth: 8,
+    boxHeight: 13,
+    textAlign: "left",
+  },
 ];
 
 export default function BeforeAfter({

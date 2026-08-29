@@ -117,7 +117,24 @@ const HELP_LINKS = [
   { title: "Privacy Policy", link: "privacy-policy" },
   { title: "Terms & Conditions", link: "term-&-condition" },
 ];
-const SOCIALS = ["facebook", "instagram", "twitter", "youtube", "linkedin"];
+const SOCIALS = [
+  {
+    title: "facebook",
+    link: "https://www.facebook.com/share/198s98zUAS/?mibextid=wwXIfr"
+  },
+  {
+    title: "instagram",
+    link: "https://www.instagram.com/flucke_luxuryskincare?igsh=MXM3bGhycjlrbDl4Nw=="
+  },
+  {
+    title: "twitter",
+    link: ""
+  },
+  {
+    title: "youtube",
+    link: ""
+  },
+];
 
 export default function Footer({
   marqueeText = "Powered by Science & Nature. Smart Skincare, Powered by Science.",
@@ -234,9 +251,9 @@ export default function Footer({
         <div className="rl-footer__bottom">
           <div className="rl-footer__socials">
             {SOCIALS.map((s) => (
-              <a href="#!" key={s} className="rl-footer__social-btn" aria-label={s}>
-                <SocialIcon type={s} />
-              </a>
+              <Link to={s.link} key={s} className="rl-footer__social-btn" aria-label={s}>
+                <SocialIcon type={s.title} />
+              </Link>
             ))}
           </div>
           <span className="rl-footer__copyright">{copyright}</span>

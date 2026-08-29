@@ -92,7 +92,7 @@
 .rl-products__image {
   position: absolute;
   inset: 0;
-  background-size: contain;
+  background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
   transform: scale(1);

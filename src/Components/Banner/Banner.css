@@ -64,7 +64,7 @@
   font-weight: 500;
   letter-spacing: 0;
   text-transform: uppercase;
-  color: #f6d9c2;
+  color: white;
   backdrop-filter: blur(2px);
 }
 
@@ -72,7 +72,7 @@
   margin: 22px 0 2.5rem;
   font-family: "Anton", sans-serif;
   font-weight: 400;
-  color: var(--rl-peach);
+  color: white;
   line-height: 0.95;
   text-transform: uppercase;
 }
@@ -80,14 +80,14 @@
 .rl-banner__headline-line {
   display: block;
   font-size: clamp(48px, 9vw, 120px);
-  letter-spacing: -5px;
+  letter-spacing: -2px;
 }
 
 .rl-banner__subheading {
   margin: 0 0 25px;
   font-size: 18px;
   font-weight: 400;
-  color: #fdfaf5;
+  color: white;
   letter-spacing: 0.2px;
 }
 

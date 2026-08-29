@@ -117,8 +117,7 @@ const Dashboard = () => {
 
                 <td>
                   {order.user?.name ||
-                    `${order.user?.firstName || ""} ${
-                      order.user?.lastName || ""
+                    `${order.user?.email || ""
                     }`}
                 </td>
 

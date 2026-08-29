@@ -40,7 +40,7 @@ const FOOTER_LINKS = [
   "Contact",
 ];
 
-export default function Checkout({ taxAmount = 2.0, onPlaceOrder }) {
+export default function Checkout({ taxAmount = 0, onPlaceOrder }) {
   const cartItems = useSelector((state) => state.cart.cartItems);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -400,9 +400,9 @@ export default function Checkout({ taxAmount = 2.0, onPlaceOrder }) {
             <span>Total</span>
             <span>₹{grandTotal.toFixed(2)}</span>
           </div>
-          <p className="rl-checkout__tax-note">
+          {/* <p className="rl-checkout__tax-note">
             Including ₹{taxAmount.toFixed(2)} in taxes
-          </p>
+          </p> */}
         </aside>
       </div>
       <LuxuryCta />

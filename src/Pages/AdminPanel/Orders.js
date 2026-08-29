@@ -45,6 +45,7 @@ export default function Orders() {
   const changeStatus = async (id, status) => {
     await dispatch(updateOrderStatus({ id, status }));
   };
+  console.log(filteredOrders,"order")
 
   return (
     <div className="admin-table-wrapper">
@@ -82,7 +83,7 @@ export default function Orders() {
 
               <td>
                 {order.user?.name ||
-                  `${order.user?.firstName || ""} ${order.user?.lastName || ""}`}
+                  `${order.user?.email || ""}`}
               </td>
 
               <td>₹{order.total}</td>

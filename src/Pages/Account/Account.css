@@ -725,6 +725,61 @@
   flex: 1;
 }
 
+
+.rl-modal-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.55);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:9999;
+}
+
+.rl-order-modal{
+    width:min(700px,95%);
+    max-height:90vh;
+    overflow:auto;
+    background:#fff;
+    border-radius:12px;
+    padding:28px;
+    position:relative;
+    
+}
+.rl-order-modal__item h5{
+  margin: 0;
+}
+
+.rl-modal-close{
+    position:absolute;
+    right:20px;
+    top:20px;
+    border:none;
+    background:none;
+    font-size:30px;
+    cursor:pointer;
+}
+
+.rl-order-modal__section{
+    margin-bottom:24px;
+    border-bottom:1px solid #eee;
+    padding-bottom:18px;
+}
+
+.rl-order-modal__item{
+    display:flex;
+    gap:16px;
+    margin-bottom:18px;
+    border-bottom: 1px solid var(--rl-line);
+}
+
+.rl-order-modal__item img{
+    width:80px;
+    height:80px;
+    object-fit:cover;
+    border-radius:8px;
+}
+
 /* ---------- Responsive ---------- */
 @media (max-width: 900px) {
   .rl-account__hero {

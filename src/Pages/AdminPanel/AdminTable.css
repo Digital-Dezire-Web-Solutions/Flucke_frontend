@@ -44,7 +44,8 @@
   background: #fff;
   border-radius: 12px;
   padding: 24px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+  overflow: auto;
+  border: 1px solid var(--rl-line);
 }
 
 /* ===========================
@@ -170,6 +171,8 @@
 }
 
 .admin-modal {
+  height: 90vh;
+  overflow: auto;
   width: 550px;
   max-width: 95%;
   background: white;
@@ -225,10 +228,11 @@
   border-radius: 8px;
   border: none;
   cursor: pointer;
+  width: 100%;
 }
 
 .modal-actions button:first-child {
-  background: #ececec;
+  background: #878787;
 }
 
 .modal-actions button:first-child:hover {
@@ -262,6 +266,39 @@
   color: #1976d2;
 }
 
+.toggle-row {
+  display: flex;
+  gap: 24px;
+  margin: 4px 0 15px;
+  flex-wrap: wrap;
+}
+
+.toggle-row__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  color: #333;
+  cursor: pointer;
+}
+
+.status-pill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.status-pill--on {
+  background: #dcf1df;
+  color: #297a3c;
+}
+
+.status-pill--off {
+  background: #f1ecd8;
+  color: #8a742e;
+}
 /* ===========================
    Responsive
 =========================== */

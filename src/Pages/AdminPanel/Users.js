@@ -79,7 +79,7 @@ export default function Users() {
             <th>Phone</th>
             <th>Role</th>
             <th>Blocked</th>
-            <th>Verified</th>
+            {/* <th>Verified</th> */}
             <th>Joined</th>
             <th>Action</th>
           </tr>
@@ -98,7 +98,7 @@ export default function Users() {
 
               <td>{user.isBlocked ? "Yes" : "No"}</td>
 
-              <td>{user.isVerified ? "Yes" : "No"}</td>
+              {/* <td>{user.isVerified ? "Yes" : "No"}</td> */}
 
               <td>{new Date(user.createdAt).toLocaleDateString()}</td>
 
@@ -190,7 +190,7 @@ export default function Users() {
               Block User
             </label>
 
-            <label>
+            {/* <label>
               <input
                 type="checkbox"
                 checked={selected.isVerified}
@@ -202,7 +202,7 @@ export default function Users() {
                 }
               />
               Verified
-            </label>
+            </label> */}
 
             <div className="modal-actions">
               <button onClick={() => setOpen(false)}>Cancel</button>

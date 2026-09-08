@@ -27,6 +27,7 @@ import {
 import { getMyOrders } from "../../Redux/features/order/orderSlice";
 import { useNavigate } from "react-router-dom";
 import LuxuryCta from "../../Components/LuxuryCta/LuxuryCta";
+import OrderDetailsModal from "./OrderDetailsModal";
 
 export default function Account({ onLogout }) {
   const dispatch = useDispatch();
@@ -74,6 +75,7 @@ export default function Account({ onLogout }) {
   const openEditAddress = (address) => setAddressModal({ open: true, address });
   const closeAddressModal = () =>
     setAddressModal({ open: false, address: null });
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
   const handleSaveAddress = async (values) => {
     try {
@@ -128,7 +130,12 @@ export default function Account({ onLogout }) {
       qty: p.quantity,
       price: p.price,
       image: p.product.images?.[0],
+      size: p.size,
     })),
+    shippingAddress: order.shippingAddress,
+    paymentMethod: order.paymentMethod,
+    couponCode: order.couponCode,
+    createdAt: order.createdAt,
   }));
 
   const activeUser = {
@@ -227,6 +234,7 @@ export default function Account({ onLogout }) {
                 ...activeUser,
                 orders,
               }}
+              onViewDetails={(order) => setSelectedOrder(order)}
             />
           )}
 
@@ -274,6 +282,12 @@ export default function Account({ onLogout }) {
         address={addressModal.address}
         onClose={closeAddressModal}
         onSave={handleSaveAddress}
+      />
+      <OrderDetailsModal
+        isOpen={!!selectedOrder}
+        order={selectedOrder}
+        user={activeUser}
+        onClose={() => setSelectedOrder(null)}
       />
       <LuxuryCta />
     </main>

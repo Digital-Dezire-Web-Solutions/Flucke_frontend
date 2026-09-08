@@ -466,18 +466,6 @@ export default function Cart({
                   Remove Coupon
                 </button>
               )}
-
-              {/* <GiftBowIcon />
-              <div>
-                <h4>Buying for a loved one?</h4>
-                <p>
-                  Send personalized message on card along with a gift wrapper at
-                  ₹{giftWrapPrice}
-                </p>
-                <button type="button" className="rl-cart-page__gift-link">
-                  Add Gift Wrap
-                </button>
-              </div> */}
             </div>
 
             <div className="rl-cart-page__pills">
@@ -493,9 +481,10 @@ export default function Cart({
             </div>
 
             <div className="rl-cart-page__total-row">
-              <span>Estimated total</span>
+              <span>Total</span>
               <span>
-                ₹{(appliedCoupon?.finalAmount ?? subtotal).toFixed(2)}
+                {}
+                ₹{(subtotal).toFixed(2)}
                 {saved > 0 && (
                   <span className="rl-cart-page__total-original">
                     ₹{originalSubtotal.toFixed(2)}
@@ -503,9 +492,22 @@ export default function Cart({
                 )}
               </span>
             </div>
+            <div className="rl-cart-page__total-row">
+              <span>Discount</span>
+              <span>
+                <span>-₹{appliedCoupon?.discount.toFixed(2) || 0}</span>
+              </span>
+            </div>
+            <div className="rl-cart-page__total-row">
+              <span>Estimated total</span>
+              <span>
+                {}
+                ₹{(appliedCoupon?.finalAmount ?? subtotal).toFixed(2)}
+              </span>
+            </div>
             {saved > 0 && (
               <p className="rl-cart-page__saved">
-                You've saved ₹{saved.toFixed(0)} USD!
+                You've saved ₹{appliedCoupon?.discount ?  (saved + appliedCoupon?.discount).toFixed(0) : saved.toFixed(0)}!
               </p>
             )}
 

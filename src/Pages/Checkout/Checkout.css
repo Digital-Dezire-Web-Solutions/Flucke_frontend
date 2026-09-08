@@ -5,6 +5,12 @@
   --rl-muted: #7a746a;
   --rl-border: #e1ddd2;
   --rl-sale: #c0392b;
+  --rl-cream: #f7f6f1;
+  --rl-ink: #1a1712;
+  --rl-ink-soft: #3d382f;
+  --rl-lime: #dcec9a;
+  --rl-line: #e7e3d8;
+  --rl-muted: #918c7d;
   font-family: "Poppins", sans-serif;
   color: var(--rl-ink);
   background: #ffffff;

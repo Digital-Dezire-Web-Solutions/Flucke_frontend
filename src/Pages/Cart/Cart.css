@@ -190,7 +190,7 @@
 }
 
 .rl-cart-page__gift {
-  display: flex;
+  /* display: flex; */
   gap: 16px;
   background: #efeafb;
   border-radius: 12px;
@@ -242,6 +242,19 @@
   cursor: pointer;
 }
 
+.remove-coupon-btn{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--rl-border);
+  background: red;
+  color: white;
+  font-size: 12.5px;
+  font-weight: 500;
+  padding: 10px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+}
 .rl-cart-page__total-row {
   display: flex;
   align-items: center;

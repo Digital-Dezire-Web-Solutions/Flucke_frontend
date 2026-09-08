@@ -7,29 +7,12 @@ import { clearCart } from "../../Redux/features/cart/cartSlice";
 import { clearCoupon } from "../../Redux/features/coupon/couponslice";
 import { useNavigate } from "react-router-dom";
 import LuxuryCta from "../../Components/LuxuryCta/LuxuryCta";
-
-const EXPRESS_METHODS = [
-  {
-    id: "paypal",
-    label: "PayPal",
-    className: "rl-checkout__express-btn--paypal",
-  },
-  {
-    id: "shoppay",
-    label: "Shop Pay",
-    className: "rl-checkout__express-btn--shoppay",
-  },
-  {
-    id: "applepay",
-    label: "Apple Pay",
-    className: "rl-checkout__express-btn--applepay",
-  },
-  {
-    id: "googlepay",
-    label: "G Pay",
-    className: "rl-checkout__express-btn--googlepay",
-  },
-];
+import AddressesTab from "../Account/AddressTab";
+import AddressModal from "../Account/AddressModal";
+import { addAddress, getProfile } from "../../Redux/features/auth/authSlice";
+import LoadingModal from "../../Components/Loaders/LoadingModal";
+import axios from "axios";
+import api from "../../Redux/services/api";
 
 const FOOTER_LINKS = [
   "Refund policy",
@@ -50,7 +33,41 @@ export default function Checkout({ taxAmount = 0, onPlaceOrder }) {
     user?.addresses?.find((a) => a.isDefault) || user?.addresses?.[0];
 
   const [selectedAddress, setSelectedAddress] = useState(defaultAddress);
-  const [billingSame, setBillingSame] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [addressModal, setAddressModal] = useState({
+    open: false,
+    address: null,
+  });
+
+  const openAddAddress = () =>
+    setAddressModal({
+      open: true,
+      address: null,
+    });
+
+  const closeAddressModal = () =>
+    setAddressModal({
+      open: false,
+      address: null,
+    });
+
+  const handleSaveAddress = async (values) => {
+    try {
+      await dispatch(addAddress(values)).unwrap();
+
+      const res = await dispatch(getProfile()).unwrap();
+
+      const address =
+        res.addresses?.find((a) => a.isDefault) || res.addresses?.[0];
+
+      setSelectedAddress(address);
+
+      closeAddressModal();
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   const [form, setForm] = useState({
     email: user?.email || "",
     name: user?.name || "",
@@ -76,6 +93,16 @@ export default function Checkout({ taxAmount = 0, onPlaceOrder }) {
       country: selectedAddress.country,
     }));
   }, [selectedAddress]);
+  useEffect(() => {
+    const defaultAddress =
+      user?.addresses?.find((a) => a.isDefault) || user?.addresses?.[0];
+
+    if (defaultAddress) {
+      setSelectedAddress(defaultAddress);
+    } else {
+      setSelectedAddress(null);
+    }
+  }, [user?.addresses]);
 
   const handleField = (field) => (e) =>
     setForm((f) => ({ ...f, [field]: e.target.value }));
@@ -98,11 +125,16 @@ export default function Checkout({ taxAmount = 0, onPlaceOrder }) {
   const handlePlaceOrder = async (e) => {
     e.preventDefault();
 
-    if (cartItems.length === 0) {
+    if (!cartItems.length) {
       alert("Your cart is empty");
       return;
     }
 
+    if (!selectedAddress) {
+      alert("Please add and select a delivery address.");
+      return;
+    }
+    setLoading(true);
     const orderData = {
       products: cartItems.map((item) => ({
         product: item._id,
@@ -126,14 +158,19 @@ export default function Checkout({ taxAmount = 0, onPlaceOrder }) {
     };
 
     try {
-      await dispatch(createOrder(orderData)).unwrap();
+      const response = await api.post(
+        "/orders/razorpay/create-order",
+        {
+          amount: grandTotal,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        },
+      );
 
-      dispatch(clearCart());
-      dispatch(clearCoupon());
-
-      alert("Order placed successfully.");
-
-      navigate("/account");
+      const { order, key } = response.data;
     } catch (err) {
       alert(err);
     }
@@ -168,134 +205,75 @@ export default function Checkout({ taxAmount = 0, onPlaceOrder }) {
             Sign up for exclusive offers, expert tips and daily inspiration
           </label> */}
           </section>
-
           <section className="rl-checkout__section">
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: 20,
-              }}
-            >
-              <h3>Select Address</h3>
-
-              <button
-                type="button"
-                className="rl-checkout__link-btn"
-                onClick={() => navigate("/account")}
+            <h3>Shipping methods</h3>
+            <div className="rl-checkout__placeholder-box">
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginBottom: 20,
+                }}
               >
-                + Add Address
-              </button>
-            </div>
-
-            {user?.addresses?.length ? (
-              user.addresses.map((address) => (
-                <label key={address._id} className="checkout-address-card">
-                  <input
-                    type="radio"
-                    name="address"
-                    checked={selectedAddress?._id === address._id}
-                    onChange={() => setSelectedAddress(address)}
-                  />
-
-                  <div>
-                    <strong>{address.name}</strong>
-
-                    <p>
-                      {address.area}
-                    </p>
-
-                    <p>
-                      {address.city}, {address.state} - {address.pincode}
-                    </p>
-
-                    <p>{address.phone}</p>
-
-                    {address.isDefault && (
-                      <span className="default-badge">Default</span>
-                    )}
-                  </div>
-                </label>
-              ))
-            ) : (
-              <div className="checkout-no-address">
-                <p>No saved address found.</p>
+                <h3>Select Address</h3>
 
                 <button
                   type="button"
                   className="rl-checkout__link-btn"
-                  onClick={() => navigate("/account")}
+                  onClick={openAddAddress}
                 >
-                  Add Address
+                  + Add Address
                 </button>
               </div>
-            )}
-          </section>
 
-          {/* <section className="rl-checkout__section">
-            <h3>Delivery</h3>
-            <input
-              className="rl-checkout__input"
-              placeholder="Full Name"
-              value={form.name}
-              onChange={handleField("name")}
-            />
-            <input
-              className="rl-checkout__input"
-              placeholder="Phone number"
-              value={form.phone}
-              onChange={handleField("phone")}
-            />
-            <select
-              className="rl-checkout__input rl-checkout__select"
-              value={form.country}
-              onChange={handleField("country")}
-            >
-              <option value="">Country</option>
-              <option value="IN">India</option>
-              <option value="US">United States</option>
-              <option value="UK">United Kingdom</option>
-            </select>
-            <div className="rl-checkout__grid-3">
-              <input
-                className="rl-checkout__input"
-                placeholder="City"
-                value={form.city}
-                onChange={handleField("city")}
-              />
-              <input
-                className="rl-checkout__input"
-                placeholder="State"
-                value={form.state}
-                onChange={handleField("state")}
-              />
-              <input
-                className="rl-checkout__input"
-                placeholder="ZIP Code"
-                value={form.zip}
-                onChange={handleField("zip")}
-              />
+              {user?.addresses?.length ? (
+                user.addresses.map((address) => (
+                  <label key={address._id} className="checkout-address-card">
+                    <input
+                      type="radio"
+                      name="address"
+                      value={address._id}
+                      checked={selectedAddress?._id === address._id}
+                      onChange={() => setSelectedAddress(address)}
+                    />
+
+                    <div>
+                      <strong>{address.name}</strong>
+
+                      <p>{address.area}</p>
+
+                      <p>
+                        {address.city}, {address.state} - {address.pincode}
+                      </p>
+
+                      <p>{address.phone}</p>
+
+                      {address.isDefault && (
+                        <span className="default-badge">Default</span>
+                      )}
+                    </div>
+                  </label>
+                ))
+              ) : (
+                <div className="checkout-no-address">
+                  <p>No saved address found.</p>
+                  <button
+                    type="button"
+                    className="rl-btn rl-btn--dark"
+                    onClick={openAddAddress}
+                  >
+                    + Add Address
+                  </button>
+                </div>
+              )}
             </div>
-            <input
-              className="rl-checkout__input"
-              placeholder="Address"
-              value={form.address}
-              onChange={handleField("address")}
-            />
-            <label className="rl-checkout__checkbox">
-              <input type="checkbox" />
-              Text me with news and offers
-            </label>
+          </section>
+          {/* <section className="rl-checkout__section">
+            
           </section> */}
 
-          <section className="rl-checkout__section">
-            <h3>Shipping methods</h3>
-            <div className="rl-checkout__placeholder-box">
-              Enter your shipping address to view available shipping methods
-            </div>
-          </section>
-          <section className="rl-checkout__section">
+          {/* <section className="rl-checkout__section">
             <h3>Billing address</h3>
             <button
               type="button"
@@ -317,7 +295,7 @@ export default function Checkout({ taxAmount = 0, onPlaceOrder }) {
               />
               Use a different billing address
             </button>
-          </section>
+          </section> */}
 
           <button type="submit" className="rl-checkout__place-order">
             Place Order
@@ -404,7 +382,15 @@ export default function Checkout({ taxAmount = 0, onPlaceOrder }) {
             Including ₹{taxAmount.toFixed(2)} in taxes
           </p> */}
         </aside>
+        <AddressModal
+          isOpen={addressModal.open}
+          address={addressModal.address}
+          onClose={closeAddressModal}
+          onSave={handleSaveAddress}
+        />
+        {loading === true && <LoadingModal loadingtype={"truck"} />}
       </div>
+
       <LuxuryCta />
     </>
   );

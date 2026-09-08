@@ -131,10 +131,11 @@ export default function Cart({
     };
   }, [isOpen]);
 
-  const updateQuantity = (id, delta) => {
+  const updateQuantity = (id, size, delta) => {
     dispatch(
       updateCartQuantity({
         id,
+        size,
         delta,
       }),
     );
@@ -173,8 +174,13 @@ export default function Cart({
     }
   };
 
-  const removeItem = (id) => {
-    dispatch(removeFromCart(id));
+  const removeItem = (id, size) => {
+    dispatch(
+      removeFromCart({
+        id,
+        size,
+      }),
+    );
   };
 
   return (
@@ -201,25 +207,6 @@ export default function Cart({
           </button>
         </div>
 
-        {/* <div className="rl-cart__shipping">
-          {remainingForFreeShipping > 0 ? (
-            <p className="rl-cart__shipping-text">
-              Spend ₹{remainingForFreeShipping.toFixed(2)} more for free
-              shipping
-            </p>
-          ) : (
-            <p className="rl-cart__shipping-text">
-              You've unlocked free shipping!
-            </p>
-          )}
-          <div className="rl-cart__progress">
-            <div
-              className="rl-cart__progress-fill"
-              style={{ width: `${progressPct}%` }}
-            />
-          </div>
-        </div> */}
-
         <div className="rl-cart__items">
           {cartItems.map((item) => (
             <div className="rl-cart__item" key={item._id}>
@@ -241,9 +228,9 @@ export default function Cart({
                       </span>
                     )}
                     <span
-                      className={item.price ? "rl-cart__item-price-sale" : ""}
+                      className={item?.price ? "rl-cart__item-price-sale" : ""}
                     >
-                      ₹{(item.salePrice || item.price).toFixed(2)}
+                      ₹{(item?.salePrice || item?.price)?.toFixed(2)}
                     </span>
                   </div>
                 </div>
@@ -260,7 +247,7 @@ export default function Cart({
                     <span>{item.quantity}</span>
                     <button
                       type="button"
-                      onClick={() => updateQuantity(item._id, 1)}
+                      onClick={() => updateQuantity(item._id, item.size, 1)}
                       aria-label="Increase quantity"
                     >
                       <PlusIcon />
@@ -269,7 +256,7 @@ export default function Cart({
                   <button
                     type="button"
                     className="rl-cart__remove"
-                    onClick={() => removeItem(item._id)}
+                    onClick={() => removeItem(item._id, item.size)}
                     aria-label={`Remove ${item.name}`}
                   >
                     <TrashIcon />

@@ -111,8 +111,17 @@ export default function ProductGrid({
     dispatch(getProducts());
   }, [dispatch]);
 
+  // const handleAddToCart = (product) => {
+  //   dispatch(addToCart(product));
+  // };
   const handleAddToCart = (product) => {
-    dispatch(addToCart(product));
+    dispatch(
+      addToCart({
+        ...product,
+        size: product.sizes?.[0] || "default",
+        quantity: 1, 
+      }),
+    );
   };
 
   // console.log(products, "products");

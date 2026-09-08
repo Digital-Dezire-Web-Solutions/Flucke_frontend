@@ -154,13 +154,10 @@ export default function Orders() {
               {selectedOrder.orderNumber}
             </p>
 
-            <p>
+            {/* <p>
               <strong>Customer :</strong>{" "}
-              {selectedOrder.user?.name ||
-                `${selectedOrder.user?.firstName || ""} ${
-                  selectedOrder.user?.lastName || ""
-                }`}
-            </p>
+              {selectedOrder.user?.name}
+            </p> */}
 
             <p>
               <strong>Email :</strong>{" "}

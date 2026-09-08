@@ -67,17 +67,6 @@ export default function AddressModal({ isOpen, address, onClose, onSave }) {
         </h2>
 
         <form className="rl-modal__form" onSubmit={handleSubmit}>
-          <label className="rl-field">
-            <span>Address label*</span>
-            <input
-              ref={firstFieldRef}
-              type="text"
-              placeholder="e.g. Home, Office"
-              value={values.label}
-              onChange={update("label")}
-              required
-            />
-          </label>
 
           <label className="rl-field">
             <span>Full name*</span>

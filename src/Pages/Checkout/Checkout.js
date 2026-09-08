@@ -158,19 +158,29 @@ export default function Checkout({ taxAmount = 0, onPlaceOrder }) {
     };
 
     try {
-      const response = await api.post(
-        "/orders/razorpay/create-order",
-        {
-          amount: grandTotal,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        },
-      );
+      // const response = await api.post(
+      //   "/orders/razorpay/create-order",
+      //   {
+      //     amount: grandTotal,
+      //   },
+      //   {
+      //     headers: {
+      //       Authorization: `Bearer ${localStorage.getItem("token")}`,
+      //     },
+      //   },
+      // );
 
-      const { order, key } = response.data;
+      // const { order, key } = response.data;
+      await dispatch(createOrder(orderData)).unwrap();
+
+      dispatch(clearCart());
+      dispatch(clearCoupon());
+
+      setTimeout(() => {
+        setLoading(false);
+        alert("Order placed successfully.");
+        navigate("/account");
+      }, 3000);
     } catch (err) {
       alert(err);
     }

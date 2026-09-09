@@ -23,6 +23,15 @@ export default function Orders() {
   const [search, setSearch] = useState("");
   const [selectedOrder, setSelectedOrder] = useState(null);
 
+  // Holds the in-progress "mark as Shipped" form — the select doesn't
+  // dispatch immediately for Shipped, it opens this instead.
+  const [shipModal, setShipModal] = useState({
+    open: false,
+    order: null,
+    orderNote: "",
+    trackingId: "",
+  });
+
   useEffect(() => {
     dispatch(getOrders());
   }, [dispatch]);
@@ -34,18 +43,43 @@ export default function Orders() {
         `${order.user?.firstName || ""} ${order.user?.lastName || ""}`;
 
       return (
-        order.orderNumber
-          ?.toLowerCase()
-          .includes(search.toLowerCase()) ||
+        order.orderNumber?.toLowerCase().includes(search.toLowerCase()) ||
         customer.toLowerCase().includes(search.toLowerCase())
       );
     });
   }, [orders, search]);
 
-  const changeStatus = async (id, status) => {
-    await dispatch(updateOrderStatus({ id, status }));
+  const handleStatusChange = (order, newStatus) => {
+    if (newStatus === "Shipped") {
+      // Don't fire the update yet — open the modal and wait for Save.
+      // The <select> itself stays bound to order.orderStatus from Redux,
+      // so if the admin cancels, it naturally reverts since nothing dispatched.
+      setShipModal({
+        open: true,
+        order,
+        orderNote: order.orderNote || "",
+        trackingId: order.trackingId || "",
+      });
+      return;
+    }
+
+    dispatch(updateOrderStatus({ id: order._id, status: newStatus }));
   };
-  console.log(filteredOrders,"order")
+
+  const closeShipModal = () =>
+    setShipModal({ open: false, order: null, orderNote: "", trackingId: "" });
+
+  const confirmShipped = async () => {
+    await dispatch(
+      updateOrderStatus({
+        id: shipModal.order._id,
+        status: "Shipped",
+        orderNote: shipModal.orderNote,
+        trackingId: shipModal.trackingId,
+      }),
+    );
+    closeShipModal();
+  };
 
   return (
     <div className="admin-table-wrapper">
@@ -60,7 +94,6 @@ export default function Orders() {
       </div>
 
       <table className="admin-table">
-
         <thead>
           <tr>
             <th>Order ID</th>
@@ -74,43 +107,26 @@ export default function Orders() {
         </thead>
 
         <tbody>
-
           {filteredOrders.map((order) => (
-
             <tr key={order._id}>
-
               <td>{order.orderNumber}</td>
-
-              <td>
-                {order.user?.name ||
-                  `${order.user?.email || ""}`}
-              </td>
-
+              <td>{order.user?.name || `${order.user?.email || ""}`}</td>
               <td>₹{order.total}</td>
-
               <td>{order.paymentMethod}</td>
-
               <td>
-
                 <span
                   className={`status-badge status-${order.orderStatus.toLowerCase()}`}
                 >
                   {order.orderStatus}
                 </span>
-
               </td>
 
-              <td>
-                {new Date(order.createdAt).toLocaleDateString()}
-              </td>
+              <td>{new Date(order.createdAt).toLocaleDateString()}</td>
 
               <td>
-
                 <select
                   value={order.orderStatus}
-                  onChange={(e) =>
-                    changeStatus(order._id, e.target.value)
-                  }
+                  onChange={(e) => handleStatusChange(order, e.target.value)}
                 >
                   {STATUS.map((item) => (
                     <option key={item}>{item}</option>
@@ -124,15 +140,10 @@ export default function Orders() {
                 >
                   View
                 </button>
-
               </td>
-
             </tr>
-
           ))}
-
         </tbody>
-
       </table>
 
       {loading && <p>Loading...</p>}
@@ -148,31 +159,30 @@ export default function Orders() {
             onClick={(e) => e.stopPropagation()}
           >
             <h2>Order Details</h2>
-
             <p>
-              <strong>Order :</strong>{" "}
-              {selectedOrder.orderNumber}
+              <strong>Order :</strong> {selectedOrder.orderNumber}
+            </p>
+            <p>
+              <strong>Email :</strong> {selectedOrder.user?.email}
+            </p>
+            <p>
+              <strong>Payment :</strong> {selectedOrder.paymentMethod}
+            </p>
+            <p>
+              <strong>Status :</strong> {selectedOrder.orderStatus}
             </p>
 
-            {/* <p>
-              <strong>Customer :</strong>{" "}
-              {selectedOrder.user?.name}
-            </p> */}
+            {selectedOrder.trackingId && (
+              <p>
+                <strong>Tracking ID :</strong> {selectedOrder.trackingId}
+              </p>
+            )}
 
-            <p>
-              <strong>Email :</strong>{" "}
-              {selectedOrder.user?.email}
-            </p>
-
-            <p>
-              <strong>Payment :</strong>{" "}
-              {selectedOrder.paymentMethod}
-            </p>
-
-            <p>
-              <strong>Status :</strong>{" "}
-              {selectedOrder.orderStatus}
-            </p>
+            {selectedOrder.orderNote && (
+              <p>
+                <strong>Note :</strong> {selectedOrder.orderNote}
+              </p>
+            )}
 
             <hr />
 
@@ -189,13 +199,9 @@ export default function Orders() {
               </thead>
 
               <tbody>
-
                 {selectedOrder.products.map((item) => (
-
                   <tr key={item._id}>
-
                     <td>
-
                       <img
                         src={item.product?.images?.[0]}
                         alt=""
@@ -206,64 +212,102 @@ export default function Orders() {
                           borderRadius: 8,
                         }}
                       />
-
                     </td>
-
                     <td>{item.product?.name}</td>
-
                     <td>{item.quantity}</td>
-
                     <td>₹{item.price}</td>
-
                   </tr>
-
                 ))}
-
               </tbody>
-
             </table>
 
             <hr />
 
             <h3>Shipping Address</h3>
-
-            <p>
-              {selectedOrder.shippingAddress?.fullName}
-            </p>
-
-            <p>
-              {selectedOrder.shippingAddress?.phone}
-            </p>
-
-            <p>
-              {selectedOrder.shippingAddress?.house}
-            </p>
-
-            <p>
-              {selectedOrder.shippingAddress?.area}
-            </p>
-
+            <p>{selectedOrder.shippingAddress?.fullName}</p>
+            <p>{selectedOrder.shippingAddress?.phone}</p>
+            <p>{selectedOrder.shippingAddress?.house}</p>
+            <p>{selectedOrder.shippingAddress?.area}</p>
             <p>
               {selectedOrder.shippingAddress?.city},{" "}
               {selectedOrder.shippingAddress?.state}
             </p>
-
             <p>
               {selectedOrder.shippingAddress?.country} -{" "}
               {selectedOrder.shippingAddress?.pincode}
             </p>
 
             <div className="modal-actions">
-
               <button
                 className="save-btn"
                 onClick={() => setSelectedOrder(null)}
               >
                 Close
               </button>
-
             </div>
+          </div>
+        </div>
+      )}
 
+      {shipModal.open && (
+        <div className="admin-modal-overlay" onClick={closeShipModal}>
+          <div className="admin-modal" onClick={(e) => e.stopPropagation()}>
+            <h3>Mark as Shipped</h3>
+
+            <p style={{ marginBottom: 16, color: "#666" }}>
+              Order: <strong>{shipModal.order?.orderNumber}</strong> — the
+              customer will get an email as soon as you save this.
+            </p>
+
+            {/* <label
+              style={{
+                display: "block",
+                marginBottom: 6,
+                fontSize: 13,
+                fontWeight: 600,
+              }}
+            >
+              Tracking ID (optional)
+            </label> */}
+            {/* <input
+              placeholder="Tracking / AWB number"
+              value={shipModal.trackingId}
+              onChange={(e) =>
+                setShipModal((s) => ({ ...s, trackingId: e.target.value }))
+              }
+            /> */}
+
+            <label
+              style={{
+                display: "block",
+                margin: "14px 0 6px",
+                fontSize: 13,
+                fontWeight: 600,
+              }}
+            >
+              Order note
+            </label>
+            <textarea
+              placeholder="e.g. Shipped via BlueDart, expect delivery in 3-5 days"
+              value={shipModal.orderNote}
+              onChange={(e) =>
+                setShipModal((s) => ({ ...s, orderNote: e.target.value }))
+              }
+              style={{
+                width: "100%",
+                minHeight: 90,
+                padding: 12,
+                borderRadius: 8,
+                border: "1px solid #ddd",
+              }}
+            />
+
+            <div className="modal-actions">
+              <button onClick={closeShipModal}>Cancel</button>
+              <button className="save-btn" onClick={confirmShipped}>
+                 Marked as Shipped
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -269,6 +269,19 @@
   align-self: center;
 }
 
+.auth-modal__hint {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #6b6558;
+  margin: 0 0 20px;
+}
+
+.auth-modal__info {
+  margin: -8px 0 0;
+  font-size: 13px;
+  color: #297a3c;
+}
+
 @media (max-width: 780px) {
   .auth-modal {
     grid-template-columns: 1fr;

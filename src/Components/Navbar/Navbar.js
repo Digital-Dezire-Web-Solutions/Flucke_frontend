@@ -12,6 +12,7 @@ import {
     register,
     logout,
 } from "../../Redux/features/auth/authSlice";
+import api from "../../Redux/services/api";
 
 const NAV_ITEMS = [
     { label: "HOME", path: "/", children: ["Home 01", "Home 02", "Home 03"] },
@@ -134,6 +135,24 @@ export default function Navbar() {
         0
     );
 
+    const handleForgotPassword = async ({ email }) => {
+        const { data } = await api.post("/auth/forgot-password", { email });
+        if (!data.success) {
+            throw new Error(data.message || "Could not send the reset code.");
+        }
+    };
+
+    const handleResetPassword = async ({ email, otp, newPassword }) => {
+        const { data } = await api.post("/auth/reset-password", {
+            email,
+            otp,
+            newPassword,
+        });
+        if (!data.success) {
+            throw new Error(data.message || "Could not reset your password.");
+        }
+    };
+
     return (
         <header className="rl-navbar">
             <TopBar />
@@ -217,6 +236,8 @@ export default function Navbar() {
                 onClose={() => setIsAuthOpen(false)}
                 onLogin={handleLogin}
                 onSignup={handleSignup}
+                onForgotPassword={handleForgotPassword}
+                onResetPassword={handleResetPassword}
             />
         </header>
     );

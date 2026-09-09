@@ -1,6 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  getWishlist,
+  removeFromWishlist,
+} from "../../Redux/features/wishlist/wishlistSlice";
 import { useNavigate } from "react-router-dom";
-import ProductData from "../../Data/ProductData";
 
 function CloseIcon() {
   return (
@@ -9,32 +13,6 @@ function CloseIcon() {
         d="M4.5 4.5L17.5 17.5M17.5 4.5L4.5 17.5"
         stroke="currentColor"
         strokeWidth="1.6"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-function MinusIcon() {
-  return (
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-      <path
-        d="M1 6H11"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
-
-function PlusIcon() {
-  return (
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-      <path
-        d="M6 1V11M1 6H11"
-        stroke="currentColor"
-        strokeWidth="1.5"
         strokeLinecap="round"
       />
     </svg>
@@ -55,67 +33,32 @@ function TrashIcon() {
   );
 }
 
-function NoteIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-      <rect
-        x="2.5"
-        y="1.5"
-        width="11"
-        height="13"
-        rx="1.5"
-        stroke="currentColor"
-        strokeWidth="1.3"
-      />
-      <path
-        d="M5 5.5H11M5 8.5H11M5 11.5H8.5"
-        stroke="currentColor"
-        strokeWidth="1.3"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
+// Your Product model's exact field names weren't shared, so this
+// normalizes a few likely shapes (name/title, image/images[0], price as
+// number or string) into what the drawer renders. Adjust the fallbacks
+// below once you confirm the real schema.
+function normalizeProduct(p) {
+  return {
+    id: p._id || p.id,
+    title: p.name || p.title || "Untitled product",
+    image: p.image || (Array.isArray(p.images) ? p.images[0] : undefined),
+    size: p.size || p.defaultSize || p.variant || "",
+    price: Number(p.price) || 0,
+    originalPrice: p.originalPrice ? Number(p.originalPrice) : undefined,
+  };
 }
 
-function TruckIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-      <circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.3" />
-      <path
-        d="M8 4.5V8L10.5 9.5"
-        stroke="currentColor"
-        strokeWidth="1.3"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function DiscountIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-      <path
-        d="M2 7L7 2H13.5V8.5L8.5 13.5C8 14 7.2 14 6.7 13.5L2 8.8C1.5 8.3 1.5 7.5 2 7Z"
-        stroke="currentColor"
-        strokeWidth="1.3"
-        strokeLinejoin="round"
-      />
-      <circle cx="9.7" cy="5.3" r="1" fill="currentColor" />
-    </svg>
-  );
-}
-
-export default function Wishlist({
-  isOpen = false,
-  onClose,
-  items,
-}) {
+export default function Wishlist({ isOpen = false, onClose }) {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [internalItems, setInternalItems] = useState(items || ProductData);
+  const { products, loading, error } = useSelector((state) => state.wishlist);
+
+  // Refresh from the server every time the drawer opens, rather than
+  // once on mount, so it reflects anything added elsewhere (a heart
+  // button on a product card, another tab, etc.) since it was last open.
   useEffect(() => {
-    if (items) setInternalItems(items);
-  }, [items]);
+    if (isOpen) dispatch(getWishlist());
+  }, [isOpen, dispatch]);
 
   useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : "";
@@ -124,10 +67,16 @@ export default function Wishlist({
     };
   }, [isOpen]);
 
-  const removeItem = (id) => {
-    setInternalItems((list) => list.filter((it) => it.id !== id));
+  const items = products?.map(normalizeProduct);
+
+  const handleRemove = (id) => {
+    dispatch(removeFromWishlist(id));
   };
 
+  const handleViewProduct = (id) => {
+    onClose && onClose();
+    navigate(`/productdetail/${id}`);
+  };
 
   return (
     <>
@@ -142,70 +91,64 @@ export default function Wishlist({
         aria-hidden={!isOpen}
       >
         <div className="rl-cart__header">
-          <h2 className="rl-cart__title">
-            Your Wishlist ({internalItems.length})
-          </h2>
+          <h2 className="rl-cart__title">Your Wishlist ({items.length})</h2>
           <button
             type="button"
             className="rl-cart__close"
             onClick={onClose}
-            aria-label="Close cart"
+            aria-label="Close wishlist"
           >
             <CloseIcon />
           </button>
         </div>
 
-        {/* <div className="rl-cart__shipping">
-          {remainingForFreeShipping > 0 ? (
-            <p className="rl-cart__shipping-text">
-              Spend ₹{remainingForFreeShipping.toFixed(2)} more for free
-              shipping
-            </p>
-          ) : (
-            <p className="rl-cart__shipping-text">
-              You've unlocked free shipping!
-            </p>
-          )}
-          <div className="rl-cart__progress">
-            <div
-              className="rl-cart__progress-fill"
-              style={{ width: `${progressPct}%` }}
-            />
-          </div>
-        </div> */}
-
         <div className="rl-cart__items">
-          {internalItems.map((item) => (
-            <div className="rl-cart__item" key={item.id}>
-              <div
-                className="rl-cart__item-thumb"
-                style={{ backgroundImage: `url(${item.image})` }}
-              />
+          {loading && <p className="rl-cart__empty">Loading your wishlist…</p>}
 
-              <div className="rl-cart__item-body">
-                <div className="rl-cart__item-top">
-                  <div>
-                    <h3 className="rl-cart__item-title">{item.title}</h3>
-                    <p className="rl-cart__item-size">Size: {item.size}</p>
-                    {item.originalPrice && (
-                      <span className="rl-cart__item-price-original">
-                        ₹{item.originalPrice.toFixed(2)}
-                      </span>
-                    )}
-                    <span
-                      className={
-                        item.originalPrice ? "rl-cart__item-price-sale" : ""
-                      }
-                    >
-                      ₹{item.price.toFixed(2)}
-                    </span>
-                  </div>
-                  <div className="rl-cart__item-price">
+          {!loading && error && <p className="rl-cart__empty">{error}</p>}
+
+          {!loading &&
+            !error &&
+            items.map((item) => (
+              <div className="rl-cart__item" key={item.id}>
+                <div
+                  className="rl-cart__item-thumb"
+                  style={{
+                    backgroundImage: item.image
+                      ? `url(${item.image})`
+                      : undefined,
+                  }}
+                  onClick={handleViewProduct}
+                />
+
+                <div className="rl-cart__item-body">
+                  <div className="rl-cart__item-top">
+                    <div>
+                      <h3 className="rl-cart__item-title">{item.title}</h3>
+                      {item.size && (
+                        <p className="rl-cart__item-size">Size: {item.size}</p>
+                      )}
+                      <div className="rl-cart__item-price">
+                        {item.originalPrice && (
+                          <span className="rl-cart__item-price-original">
+                            ₹{item.originalPrice.toFixed(2)}
+                          </span>
+                        )}
+                        <span
+                          className={
+                            item.originalPrice ? "rl-cart__item-price-sale" : ""
+                          }
+                        >
+                          ₹{item.price.toFixed(2)}
+                        </span>
+                      </div>
+                    </div>
+
                     <div className="rl-cart__item-bottom">
                       <button
                         type="button"
                         className="rl-cart__remove"
-                        onClick={() => removeItem(item.id)}
+                        onClick={() => handleRemove(item.id)}
                         aria-label={`Remove ${item.title}`}
                       >
                         <TrashIcon />
@@ -214,11 +157,10 @@ export default function Wishlist({
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
 
-          {internalItems.length === 0 && (
-            <p className="rl-cart__empty">Your cart is empty.</p>
+          {!loading && !error && items.length === 0 && (
+            <p className="rl-cart__empty">Your wishlist is empty.</p>
           )}
         </div>
       </aside>

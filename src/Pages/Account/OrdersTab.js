@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { DownloadIcon, ViewIcon } from "./Icons";
 import "./Account.css";
+import { jsPDF } from "jspdf";
 
 function StatusBadge({ status }) {
   const map = {
@@ -16,43 +17,65 @@ function StatusBadge({ status }) {
   );
 }
 
-/**
- * Builds a plain-text invoice and triggers a browser download.
- * Swap this for a call to your backend's PDF endpoint when you have one —
- * everything else (the button, the click handler shape) stays the same.
- */
 function downloadInvoice(order, user) {
-  const lines = [
-    "ROSALINE — INVOICE",
-    "----------------------------------------",
-    `Order: ${order.id}`,
-    `Date: ${order.date}`,
-    `Status: ${order.status}`,
-    "",
-    `Billed to: ${user.name}`,
-    `Email: ${user.email}`,
-    "",
-    "Items:",
-    ...order.items.map(
-      (item) => `  ${item.name}  x${item.qty}  —  $${item.price.toFixed(2)}`,
-    ),
-    "----------------------------------------",
-    `Total: ₹${order.total.toFixed(2)}`,
-  ];
-
-  const blob = new Blob([lines.join("\n")], { type: "text/plain" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `invoice-${order.id}.txt`;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
+  const doc = new jsPDF();
+  let y = 20;
+  // Header
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(20);
+  doc.text("FLUCKE", 20, y);
+  y += 8;
+  doc.setFontSize(14);
+  doc.text("INVOICE", 20, y);
+  y += 12;
+  doc.setDrawColor(180);
+  doc.line(20, y, 190, y);
+  y += 10;
+  doc.setFontSize(11);
+  doc.setFont("helvetica", "normal");
+  doc.text(`Order ID : ${order.id}`, 20, y);
+  y += 8;
+  doc.text(`Date : ${order.date}`, 20, y);
+  y += 8;
+  doc.text(`Status : ${order.status}`, 20, y);
+  y += 15;
+  doc.setFont("helvetica", "bold");
+  doc.text("Customer Details", 20, y);
+  y += 8;
+  doc.setFont("helvetica", "normal");
+  doc.text(`Name : ${user.name}`, 20, y);
+  y += 7;
+  doc.text(`Email : ${user.email}`, 20, y);
+  y += 12;
+  doc.setFont("helvetica", "bold");
+  doc.text("Products", 20, y);
+  y += 8;
+  doc.setFont("helvetica", "normal");
+  order.items.forEach((item, index) => {
+    doc.text(`${index + 1}. ${item.name}`, 20, y);
+    y += 6;
+    doc.text(`Qty : ${item.qty}`, 30, y);
+    doc.text(`Price : RS ${item.price.toFixed(2)}`, 90, y);
+    y += 10;
+    // Add new page if needed
+    if (y > 270) {
+      doc.addPage();
+      y = 20;
+    }
+  });
+  doc.line(20, y, 190, y);
+  y += 10;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(14);
+  doc.text(`Total : RS ${order.total.toFixed(2)}`, 20, y);
+  y += 20;
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "italic");
+  doc.text("Thank you for shopping with Flucke.", 20, y);
+  doc.save(`Invoice-${order.id}.pdf`);
 }
 
 export default function OrdersTab({ user, onViewDetails }) {
-
   return (
     <div className="rl-orders-grid">
       {user.orders.map((order) => (
@@ -62,10 +85,17 @@ export default function OrdersTab({ user, onViewDetails }) {
               <div>
                 <p className="rl-order-card__id">{order.id}</p>
                 <p className="rl-order-card__date">{order.date}</p>
+                {order?.orderNote && (
+                  <p className="rl-order-card__date">{order?.orderNote}</p>
+                )}
               </div>
             </div>
             <div className="rl-order-card__head-right">
-              <StatusBadge status={order.status} />
+              <StatusBadge
+                status={
+                  order.status === "pending" ? "Order Placed" : order.status
+                }
+              />
               <span className="rl-order-card__total">
                 ₹{order.total.toFixed(2)}
               </span>
@@ -86,7 +116,6 @@ export default function OrdersTab({ user, onViewDetails }) {
               </div>
             ))}
           </div>
-
           <div className="rl-order-card__footer">
             <button
               className="rl-btn rl-btn--dark rl-btn--block"

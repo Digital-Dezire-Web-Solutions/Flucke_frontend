@@ -92,7 +92,7 @@ export default function Coupons() {
 
             <th>Min</th>
 
-            <th>Max</th>
+            <th>Max. Off</th>
 
             <th>Expiry</th>
 
@@ -227,7 +227,16 @@ export default function Coupons() {
                 })
               }
             />
-
+            <input
+              placeholder="Text to display in offers"
+              value={coupon.offerText}
+              onChange={(e) =>
+                setCoupon({
+                  ...coupon,
+                  offerText: e.target.value,
+                })
+              }
+            />
             <label>
               <input
                 type="checkbox"

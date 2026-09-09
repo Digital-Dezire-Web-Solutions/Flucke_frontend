@@ -28,6 +28,7 @@ export default function OrderDetailsModal({ isOpen, order, user, onClose }) {
           <p>
             <strong>Total:</strong> ₹{order.total.toFixed(2)}
           </p>
+          <p>{order?.orderNote}</p>
         </div>
 
         <div className="rl-order-modal__section">

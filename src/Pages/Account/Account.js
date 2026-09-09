@@ -125,6 +125,7 @@ export default function Account({ onLogout }) {
     date: new Date(order.createdAt).toLocaleDateString(),
     status: order.orderStatus.toLowerCase(),
     total: order.total,
+    orderNote: order.orderNote,
     items: order.products.map((p) => ({
       name: p.product.name,
       qty: p.quantity,
@@ -153,7 +154,6 @@ export default function Account({ onLogout }) {
   };
 
   if (!user) return <h2>Loading...</h2>;
-
   return (
     <main className="rl-account">
       <section className="rl-account__hero">

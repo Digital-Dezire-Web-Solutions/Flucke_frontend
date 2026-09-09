@@ -10,6 +10,8 @@
     "@testing-library/user-event": "^13.5.0",
     "crypto": "^1.0.1",
     "dotenv": "^17.4.2",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.8",
     "lucide-react": "^1.28.0",
     "razorpay": "^2.9.8",
     "react": "^19.2.8",

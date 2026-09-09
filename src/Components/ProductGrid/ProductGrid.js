@@ -4,6 +4,11 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getProducts } from "../../Redux/features/products/productSlice";
 import { addToCart } from "../../Redux/features/cart/cartSlice";
+import {
+  addToWishlist,
+  getWishlist,
+  removeFromWishlist,
+} from "../../Redux/features/wishlist/wishlistSlice";
 
 function StarIcon({ filled }) {
   return (
@@ -107,8 +112,12 @@ export default function ProductGrid({
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { products } = useSelector((state) => state.products);
+  const { wishlistProducts } = useSelector(
+    (state) => state.wishlist?.products || [],
+  );
   useEffect(() => {
     dispatch(getProducts());
+    dispatch(getWishlist());
   }, [dispatch]);
 
   // const handleAddToCart = (product) => {
@@ -119,9 +128,20 @@ export default function ProductGrid({
       addToCart({
         ...product,
         size: product.sizes?.[0] || "default",
-        quantity: 1, 
+        quantity: 1,
       }),
     );
+  };
+
+  const isInWishlist = (id) =>
+    wishlistProducts?.some((item) => (item._id || item.id) === id);
+
+  const handleToggleWishlist = (product) => {
+    if (isInWishlist(product._id)) {
+      dispatch(removeFromWishlist(product._id));
+    } else {
+      dispatch(addToWishlist(product));
+    }
   };
 
   // console.log(products, "products");
@@ -137,75 +157,81 @@ export default function ProductGrid({
       </div>
 
       <div className="rl-products__grid">
-        {products.map((p) => (
-          <article className="rl-products__card" key={p._id}>
-            <div className="rl-products__media">
-              <div
-                className="rl-products__image"
-                style={{
-                  backgroundImage: `url(${p.images?.[0] || "/images/no-image.png"})`,
-                }}
-              />
-
-              {p.badge && (
-                <span className="rl-products__badge">
-                  <SparkleIcon />
-                  {p.badge}
-                </span>
-              )}
-
-              <div className="rl-products__actions">
-                <button
-                  type="button"
-                  aria-label="Quick view"
-                  className="rl-products__action-btn"
-                  onClick={() => navigate(`/productdetail/${p._id}`)}
-                >
-                  <EyeIcon />
-                </button>
-                <button
-                  type="button"
-                  aria-label="Add to wishlist"
-                  className="rl-products__action-btn"
-                >
-                  <HeartIcon />
-                </button>
-              </div>
-              <div className="rl-products__rating">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <StarIcon key={i} filled={i < Math.round(p.rating)} />
-                ))}
-                <span className="rl-products__rating-count">
-                  ({p.totalReviews})
-                </span>
-              </div>
-            </div>
-
-            <h3 className="rl-products__title">{p.name}</h3>
-            <p className="rl-products__product-subtitle">{p.ingredients}</p>
-            <p className="rl-products__price">
-              {p.salePrice > 0 && (
-                <span
+        {products.map((p) => {
+          const inWishlist = isInWishlist(p._id);
+          return (
+            <article className="rl-products__card" key={p._id}>
+              <div className="rl-products__media">
+                <div
+                  className="rl-products__image"
                   style={{
-                    textDecoration: "line-through",
-                    color: "#999",
-                    marginRight: "8px",
+                    backgroundImage: `url(${p.images?.[0] || "/images/no-image.png"})`,
                   }}
-                >
-                  ₹{p.price}
-                </span>
-              )}
-              ₹{p.salePrice > 0 ? p.salePrice : p.price}
-            </p>
+                />
 
-            <button
-              className="rl-products__add-btn"
-              onClick={() => handleAddToCart(p)}
-            >
-              Add to Cart
-            </button>
-          </article>
-        ))}
+                {p.badge && (
+                  <span className="rl-products__badge">
+                    <SparkleIcon />
+                    {p.badge}
+                  </span>
+                )}
+
+                <div className="rl-products__actions">
+                  <button
+                    type="button"
+                    aria-label="Quick view"
+                    className="rl-products__action-btn"
+                    onClick={() => navigate(`/productdetail/${p._id}`)}
+                  >
+                    <EyeIcon />
+                  </button>
+                  <button
+                    type="button"
+                    aria-label={
+                      inWishlist ? "Remove from wishlist" : "Add to wishlist"
+                    }
+                    className={`rl-products__action-btn ${inWishlist ? "rl-products__action-btn--active" : ""}`}
+                    onClick={() => handleToggleWishlist(p)}
+                  >
+                    <HeartIcon />
+                  </button>
+                </div>
+                <div className="rl-products__rating">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <StarIcon key={i} filled={i < Math.round(p.rating)} />
+                  ))}
+                  <span className="rl-products__rating-count">
+                    ({p.totalReviews})
+                  </span>
+                </div>
+              </div>
+
+              <h3 className="rl-products__title">{p.name}</h3>
+              <p className="rl-products__product-subtitle">{p.ingredients}</p>
+              <p className="rl-products__price">
+                {p.salePrice > 0 && (
+                  <span
+                    style={{
+                      textDecoration: "line-through",
+                      color: "#999",
+                      marginRight: "8px",
+                    }}
+                  >
+                    ₹{p.price}
+                  </span>
+                )}
+                ₹{p.salePrice > 0 ? p.salePrice : p.price}
+              </p>
+
+              <button
+                className="rl-products__add-btn"
+                onClick={() => handleAddToCart(p)}
+              >
+                Add to Cart
+              </button>
+            </article>
+          );
+        })}
       </div>
 
       {/* <a className="rl-products__view-all" href={viewAllHref}>

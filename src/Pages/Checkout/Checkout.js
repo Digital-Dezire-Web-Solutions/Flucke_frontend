@@ -23,6 +23,40 @@ const FOOTER_LINKS = [
   "Contact",
 ];
 
+// Loads Razorpay's checkout widget script once and reuses it on later
+// clicks. Without this script, `window.Razorpay` doesn't exist and nothing
+// can open — this is the piece that actually shows the payment popup.
+function loadRazorpayScript() {
+  return new Promise((resolve) => {
+    if (window.Razorpay) {
+      resolve(true);
+      return;
+    }
+    const existing = document.getElementById("razorpay-checkout-js");
+    if (existing) {
+      existing.addEventListener("load", () => resolve(true));
+      existing.addEventListener("error", () => resolve(false));
+      return;
+    }
+    const script = document.createElement("script");
+    script.id = "razorpay-checkout-js";
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+}
+
+// Razorpay only accepts a plain 10-digit number for `prefill.contact` — no
+// country code, no spaces/dashes. If it gets anything else, it silently
+// drops the prefill and prompts the customer for it instead (which is the
+// "Contact details / Please enter your mobile number" screen you'd see).
+function sanitizePhone(phone) {
+  if (!phone) return "";
+  const digits = String(phone).replace(/\D/g, "");
+  return digits.slice(-10);
+}
+
 export default function Checkout({ taxAmount = 0, onPlaceOrder }) {
   const cartItems = useSelector((state) => state.cart.cartItems);
   const dispatch = useDispatch();
@@ -38,6 +72,12 @@ export default function Checkout({ taxAmount = 0, onPlaceOrder }) {
     open: false,
     address: null,
   });
+
+  // Preload the Razorpay script as soon as the checkout page mounts, so the
+  // "Place Order" click doesn't have to wait on it.
+  useEffect(() => {
+    loadRazorpayScript();
+  }, []);
 
   const openAddAddress = () =>
     setAddressModal({
@@ -122,6 +162,10 @@ export default function Checkout({ taxAmount = 0, onPlaceOrder }) {
 
   const grandTotal = subtotal - couponDiscount + taxAmount;
 
+  const authHeader = {
+    headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+  };
+
   const handlePlaceOrder = async (e) => {
     e.preventDefault();
 
@@ -134,7 +178,7 @@ export default function Checkout({ taxAmount = 0, onPlaceOrder }) {
       alert("Please add and select a delivery address.");
       return;
     }
-    setLoading(true);
+
     const orderData = {
       products: cartItems.map((item) => ({
         product: item._id,
@@ -152,37 +196,101 @@ export default function Checkout({ taxAmount = 0, onPlaceOrder }) {
         pincode: selectedAddress?.pincode,
       },
 
-      paymentMethod: "COD",
+      paymentMethod: "Razorpay",
 
       couponCode: appliedCoupon?.coupon?.code || "",
     };
 
+    setLoading(true);
+
     try {
-      // const response = await api.post(
-      //   "/orders/razorpay/create-order",
-      //   {
-      //     amount: grandTotal,
-      //   },
-      //   {
-      //     headers: {
-      //       Authorization: `Bearer ${localStorage.getItem("token")}`,
-      //     },
-      //   },
-      // );
-
-      // const { order, key } = response.data;
-      await dispatch(createOrder(orderData)).unwrap();
-
-      dispatch(clearCart());
-      dispatch(clearCoupon());
-
-      setTimeout(() => {
+      const scriptReady = await loadRazorpayScript();
+      if (!scriptReady) {
         setLoading(false);
-        alert("Order placed successfully.");
-        navigate("/account");
-      }, 3000);
+        alert(
+          "Could not load the payment gateway. Check your connection and try again.",
+        );
+        return;
+      }
+
+      const { data } = await api.post(
+        "/orders/razorpay/create-order",
+        { amount: grandTotal },
+        authHeader,
+      );
+
+      const { order, key } = data;
+
+      setLoading(false); // Razorpay's own popup is the "pay page" from here
+
+      const options = {
+        key,
+        amount: order.amount,
+        currency: order.currency,
+        name: "Rosaline",
+        description: "Order payment",
+        order_id: order.id,
+        prefill: {
+          name: form.name,
+          email: form.email,
+          contact: sanitizePhone(form.phone),
+        },
+        theme: { color: "#1a1712" },
+
+        // Runs after the customer successfully pays inside the Razorpay
+        // popup — this is what actually creates the Order in your DB via
+        // the signature-verified endpoint you already built.
+        handler: async (response) => {
+          setLoading(true);
+          try {
+            await api.post(
+              "/orders/razorpay/verify",
+              {
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                orderData,
+              },
+              authHeader,
+            );
+
+            dispatch(clearCart());
+            dispatch(clearCoupon());
+            alert("Order placed successfully.");
+            navigate("/account");
+          } catch (err) {
+            console.error(err);
+            alert(
+              `Payment succeeded but we couldn't confirm your order automatically. ` +
+              `Please contact support with payment id: ${response.razorpay_payment_id}`,
+            );
+          } finally {
+            setLoading(false);
+          }
+        },
+
+        modal: {
+          // Customer closed the popup without paying — just stop the
+          // loading state, don't treat it as an error.
+          ondismiss: () => setLoading(false),
+        },
+      };
+
+      const razorpayInstance = new window.Razorpay(options);
+console.log(razorpayInstance,"razorpayInstance")
+      razorpayInstance.on("payment.failed", (response) => {
+        setLoading(false);
+        alert(`Payment failed: ${response.error.description}`);
+      });
+
+      razorpayInstance.open();
     } catch (err) {
-      alert(err);
+      setLoading(false);
+      console.error(err);
+      alert(
+        err?.response?.data?.message ||
+        "Something went wrong while starting payment.",
+      );
     }
   };
 
@@ -210,10 +318,6 @@ export default function Checkout({ taxAmount = 0, onPlaceOrder }) {
               onChange={handleField("email")}
               required
             />
-            {/* <label className="rl-checkout__checkbox">
-            <input type="checkbox" />
-            Sign up for exclusive offers, expert tips and daily inspiration
-          </label> */}
           </section>
           <section className="rl-checkout__section">
             <h3>Shipping methods</h3>
@@ -279,36 +383,9 @@ export default function Checkout({ taxAmount = 0, onPlaceOrder }) {
               )}
             </div>
           </section>
-          {/* <section className="rl-checkout__section">
-            
-          </section> */}
 
-          {/* <section className="rl-checkout__section">
-            <h3>Billing address</h3>
-            <button
-              type="button"
-              className={`rl-checkout__radio-row rl-checkout__payment-option ${billingSame ? "rl-checkout__payment-option--active" : ""}`}
-              onClick={() => setBillingSame(true)}
-            >
-              <span
-                className={`rl-checkout__radio ${billingSame ? "rl-checkout__radio--checked" : ""}`}
-              />
-              Same as shipping address
-            </button>
-            <button
-              type="button"
-              className={`rl-checkout__radio-row rl-checkout__payment-option ${!billingSame ? "rl-checkout__payment-option--active" : ""}`}
-              onClick={() => setBillingSame(false)}
-            >
-              <span
-                className={`rl-checkout__radio ${!billingSame ? "rl-checkout__radio--checked" : ""}`}
-              />
-              Use a different billing address
-            </button>
-          </section> */}
-
-          <button type="submit" className="rl-checkout__place-order">
-            Place Order
+          <button type="submit" className="rl-checkout__place-order" disabled={loading}>
+            {loading ? "Please wait…" : "Place Order"}
           </button>
 
           <div className="rl-checkout__footer-links">
@@ -322,7 +399,7 @@ export default function Checkout({ taxAmount = 0, onPlaceOrder }) {
 
         <aside className="rl-checkout__summary">
           {cartItems.map((item, i) => (
-            <div className="rl-checkout__summary-item" key={item.id}>
+            <div className="rl-checkout__summary-item" key={item.lineId || item._id}>
               <div
                 className="rl-checkout__summary-thumb"
                 style={{
@@ -388,9 +465,6 @@ export default function Checkout({ taxAmount = 0, onPlaceOrder }) {
             <span>Total</span>
             <span>₹{grandTotal.toFixed(2)}</span>
           </div>
-          {/* <p className="rl-checkout__tax-note">
-            Including ₹{taxAmount.toFixed(2)} in taxes
-          </p> */}
         </aside>
         <AddressModal
           isOpen={addressModal.open}

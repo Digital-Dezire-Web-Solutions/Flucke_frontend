@@ -144,7 +144,7 @@ export default function ProductGrid({
     }
   };
 
-  // console.log(products, "products");
+  console.log(products, "products");
   return (
     <section className="rl-products">
       <div className="rl-products__intro">

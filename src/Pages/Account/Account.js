@@ -50,7 +50,7 @@ export default function Account({ onLogout }) {
     address: null,
   });
   const addresses = user?.addresses || [];
-  console.log(user, "addresses");
+  // console.log(user, "addresses");
 
   const TABS = [
     { key: "dashboard", label: "Dashboard", icon: DashboardIcon, count: 3 },
@@ -152,6 +152,7 @@ export default function Account({ onLogout }) {
     dispatch(logout());
     navigate("/");
   };
+
 
   if (!user) return <h2>Loading...</h2>;
   return (

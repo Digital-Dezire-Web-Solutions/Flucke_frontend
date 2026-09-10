@@ -20,6 +20,7 @@ const initialProduct = {
   benefits: "", // comma-separated, e.g. "Hydrating, Brightening"
   howToUse: "",
   ingredients: "",
+  amazonLink: "",
   isFeatured: false,
   status: true, // true = active / visible on the storefront
 };
@@ -148,6 +149,7 @@ export default function Products() {
     formData.append("benefits", JSON.stringify(toArray(product.benefits)));
     formData.append("howToUse", product.howToUse);
     formData.append("ingredients", product.ingredients);
+    formData.append("amazonLink", product.amazonLink);
     formData.append("isFeatured", product.isFeatured);
     formData.append("status", product.status);
 
@@ -393,6 +395,14 @@ export default function Products() {
               placeholder="Stock"
               value={product.stock}
               onChange={(e) => setProduct({ ...product, stock: e.target.value })}
+            />
+            <input
+              type="text"
+              placeholder="Amazon Link"
+              value={product.amazonLink}
+              onChange={(e) =>
+                setProduct({ ...product, amazonLink: e.target.value })
+              }
             />
 
             <div className="toggle-row">

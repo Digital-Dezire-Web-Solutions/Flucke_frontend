@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./Navbar.css";
 import logo from "../../Assets/Logo/logo.jpg";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -85,8 +85,20 @@ export default function Navbar() {
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [isWishOpen, setIsWishOpen] = useState(false);
     const [isAuthOpen, setIsAuthOpen] = useState(false);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // ADD THIS
 
     const navigate = useNavigate();
+
+    useEffect(() => {
+        if (isMobileMenuOpen) {
+            document.body.style.overflow = "hidden";
+        } else {
+            document.body.style.overflow = "";
+        }
+        return () => {
+            document.body.style.overflow = "";
+        };
+    }, [isMobileMenuOpen]);
 
     const handleAccountClick = () => {
         if (!token) {
@@ -222,7 +234,12 @@ export default function Navbar() {
                         </div>
                     </div>
 
-                    <button className="rl-navbar__burger" aria-label="Open menu" type="button">
+                    <button
+                        className="rl-navbar__burger"
+                        aria-label="Open menu"
+                        type="button"
+                        onClick={() => setIsMobileMenuOpen(true)}
+                    >
                         <span />
                         <span />
                         <span />
@@ -239,6 +256,74 @@ export default function Navbar() {
                 onForgotPassword={handleForgotPassword}
                 onResetPassword={handleResetPassword}
             />
+            {isMobileMenuOpen && (
+                <div className="rl-mobile-menu">
+                    <div
+                        className="rl-mobile-menu__backdrop"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                    />
+                    <div className="rl-mobile-menu__panel">
+                        <div className="rl-mobile-menu__top">
+                            <button
+                                className="rl-mobile-menu__close"
+                                aria-label="Close menu"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                                ×
+                            </button>
+                            <Link
+                                to="/"
+                                className="rl-mobile-menu__logo"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                            >
+                                <img src={logo} alt="" />
+                            </Link>
+                            <div className="rl-mobile-menu__icons">
+                                <button
+                                    type="button"
+                                    aria-label="Account"
+                                    className="rl-navbar__icon-btn"
+                                    onClick={() => (handleAccountClick(), setIsMobileMenuOpen(false))}
+                                >
+                                    <UserIcon />
+                                </button>
+                                <button type="button" aria-label="Wishlist" className="rl-navbar__icon-btn" onClick={() => setIsWishOpen(true)}>
+                                    <HeartIcon />
+                                </button>
+                                <button aria-label="Cart" onClick={() => { setIsMobileMenuOpen(false); setIsCartOpen(true); }}>
+                                    <CartIcon /> {cartCount > 0 && `(${cartCount})`}
+                                </button>
+                            </div>
+                        </div>
+
+                        <ul className="rl-mobile-menu__links">
+                            {NAV_ITEMS.map((item) => (
+                                <li key={item.label}>
+                                    <Link to={item.path} onClick={() => setIsMobileMenuOpen(false)}>
+                                        {item.label}
+                                        <span className="rl-mobile-menu__chevron">›</span>
+                                    </Link>
+                                </li>
+                            ))}
+                        </ul>
+
+                        <div className="rl-mobile-menu__actions">
+                            <button
+                                className="rl-mobile-menu__signin"
+                                onClick={() => { setIsMobileMenuOpen(false); handleAccountClick(); }}
+                            >
+                                SIGN IN
+                            </button>
+                            <button
+                                className="rl-mobile-menu__create"
+                                onClick={() => { setIsMobileMenuOpen(false); setIsAuthOpen(true); }}
+                            >
+                                CREATE AN ACCOUNT
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </header>
     );
 }

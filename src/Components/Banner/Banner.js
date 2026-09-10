@@ -9,7 +9,7 @@ export default function Banner({
   headline = ["Serious Care", "Sleek Results"],
   subheading = "Potent actives, clean formulas, clinically proven radiance.",
   ctaLabel = "Shop on Amazon",
-  ctaHref = "#!",
+  ctaHref = "https://www.amazon.in/s?k=Flucke&ref=bl_dp_s_web_0",
   videoUrl = bgVideo,
   posterUrl = posterImage, // shown while the video loads / if it fails to play
   features = [
@@ -48,7 +48,12 @@ export default function Banner({
 
         <p className="rl-banner__subheading">{subheading}</p>
 
-        <a className="rl-banner__cta" href={ctaHref}>
+        <a
+          className="rl-banner__cta"
+          href={ctaHref}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           <PiSparkle />
           {ctaLabel}
         </a>

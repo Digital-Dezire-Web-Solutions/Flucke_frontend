@@ -23,9 +23,6 @@ const FOOTER_LINKS = [
   "Contact",
 ];
 
-// Loads Razorpay's checkout widget script once and reuses it on later
-// clicks. Without this script, `window.Razorpay` doesn't exist and nothing
-// can open — this is the piece that actually shows the payment popup.
 function loadRazorpayScript() {
   return new Promise((resolve) => {
     if (window.Razorpay) {
@@ -47,10 +44,6 @@ function loadRazorpayScript() {
   });
 }
 
-// Razorpay only accepts a plain 10-digit number for `prefill.contact` — no
-// country code, no spaces/dashes. If it gets anything else, it silently
-// drops the prefill and prompts the customer for it instead (which is the
-// "Contact details / Please enter your mobile number" screen you'd see).
 function sanitizePhone(phone) {
   if (!phone) return "";
   const digits = String(phone).replace(/\D/g, "");
@@ -73,8 +66,6 @@ export default function Checkout({ taxAmount = 0, onPlaceOrder }) {
     address: null,
   });
 
-  // Preload the Razorpay script as soon as the checkout page mounts, so the
-  // "Place Order" click doesn't have to wait on it.
   useEffect(() => {
     loadRazorpayScript();
   }, []);
@@ -133,6 +124,7 @@ export default function Checkout({ taxAmount = 0, onPlaceOrder }) {
       country: selectedAddress.country,
     }));
   }, [selectedAddress]);
+
   useEffect(() => {
     const defaultAddress =
       user?.addresses?.find((a) => a.isDefault) || user?.addresses?.[0];
@@ -159,9 +151,7 @@ export default function Checkout({ taxAmount = 0, onPlaceOrder }) {
   );
 
   const couponDiscount = appliedCoupon?.discount || 0;
-
   const grandTotal = subtotal - couponDiscount + taxAmount;
-
   const authHeader = {
     headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
   };
@@ -183,7 +173,7 @@ export default function Checkout({ taxAmount = 0, onPlaceOrder }) {
       products: cartItems.map((item) => ({
         product: item._id,
         quantity: item.quantity,
-        price: item.price,
+        price: item.salePrice,
       })),
 
       shippingAddress: {
@@ -195,9 +185,7 @@ export default function Checkout({ taxAmount = 0, onPlaceOrder }) {
         country: selectedAddress?.country,
         pincode: selectedAddress?.pincode,
       },
-
       paymentMethod: "Razorpay",
-
       couponCode: appliedCoupon?.coupon?.code || "",
     };
 
@@ -236,10 +224,6 @@ export default function Checkout({ taxAmount = 0, onPlaceOrder }) {
           contact: sanitizePhone(form.phone),
         },
         theme: { color: "#1a1712" },
-
-        // Runs after the customer successfully pays inside the Razorpay
-        // popup — this is what actually creates the Order in your DB via
-        // the signature-verified endpoint you already built.
         handler: async (response) => {
           setLoading(true);
           try {
@@ -270,14 +254,12 @@ export default function Checkout({ taxAmount = 0, onPlaceOrder }) {
         },
 
         modal: {
-          // Customer closed the popup without paying — just stop the
-          // loading state, don't treat it as an error.
           ondismiss: () => setLoading(false),
         },
       };
 
       const razorpayInstance = new window.Razorpay(options);
-console.log(razorpayInstance,"razorpayInstance")
+// console.log(razorpayInstance,"razorpayInstance")
       razorpayInstance.on("payment.failed", (response) => {
         setLoading(false);
         alert(`Payment failed: ${response.error.description}`);

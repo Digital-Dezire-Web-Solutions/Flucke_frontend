@@ -114,7 +114,7 @@
   position: absolute;
   width: 100%;
   /* padding: 0.8rem 1.3rem 1rem; */
-      box-shadow: 0 12px 28px rgba(30, 25, 15, 0.05);
+  box-shadow: 0 12px 28px rgba(30, 25, 15, 0.05);
 }
 
 .rl-navbar__inner {
@@ -291,6 +291,114 @@
   height: 2px;
   background: var(--rl-ink);
   display: block;
+}
+
+.rl-mobile-menu {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+}
+
+.rl-mobile-menu__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.rl-mobile-menu__panel {
+  position: relative;
+  height: 100%;
+  width: min(85%, 380px);
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 25px;
+  overflow-y: auto;
+  animation: rl-slide-in 0.25s ease-out;
+}
+
+@keyframes rl-slide-in {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.rl-mobile-menu__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #eee;
+}
+
+.rl-mobile-menu__close {
+  background: none;
+  border: none;
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.rl-mobile-menu__logo img {
+  height: 32px;
+}
+
+.rl-mobile-menu__icons {
+  display: flex;
+  gap: 14px;
+}
+.rl-mobile-menu__icons button {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.rl-mobile-menu__links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.rl-mobile-menu__links li a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 0;
+  border-bottom: 1px solid #f0f0f0;
+  text-decoration: none;
+  color: var(--rl-ink);
+  font-size: 15px;
+  letter-spacing: 0.5px;
+}
+
+.rl-mobile-menu__actions {
+  margin-top: auto;
+  padding-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+}
+
+.rl-mobile-menu__signin {
+  width: 100%;
+  padding: 14px;
+  background: var(--rl-ink);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.rl-mobile-menu__create {
+  background: none;
+  border: none;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 14px;
 }
 
 @media (max-width: 1100px) {

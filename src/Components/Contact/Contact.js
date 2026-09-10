@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "./Contact.css";
+import api from "../../Redux/services/api";
 
 const DEFAULT_INFO_CARDS = [
   {
@@ -13,7 +14,10 @@ const DEFAULT_INFO_CARDS = [
   {
     title: "WhatsApp/Call",
     lines: ["+91 8766226077"],
-    link: { label: "Visit Amazon Store →", href: "#!" },
+    link: {
+      label: "Visit Amazon Store →",
+      href: "https://www.amazon.in/s?k=Flucke&ref=bl_dp_s_web_0",
+    },
   },
 ];
 
@@ -31,14 +35,46 @@ export default function Contact({
     phone: "",
     message: "",
   });
+  const [submitting, setSubmitting] = useState(false);
+  const [status, setStatus] = useState(null); // { type: "success" | "error", message }
 
   const handleChange = (field) => (e) => {
     setForm((f) => ({ ...f, [field]: e.target.value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSubmit && onSubmit(form);
+    setSubmitting(true);
+    setStatus(null);
+
+    try {
+      if (onSubmit) {
+        // Let a parent override this entirely if it wants to handle
+        // submission itself — otherwise fall through to the default API call.
+        await onSubmit(form);
+      } else {
+        const { data } = await api.post("/contact", form);
+        if (!data.success) {
+          throw new Error(data.message || "Could not send your message.");
+        }
+      }
+
+      setStatus({
+        type: "success",
+        message: "Thanks! Your message has been sent — we'll get back to you soon.",
+      });
+      setForm({ name: "", email: "", phone: "", message: "" });
+    } catch (err) {
+      setStatus({
+        type: "error",
+        message:
+          err?.response?.data?.message ||
+          err?.message ||
+          "Something went wrong. Please try again.",
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -82,8 +118,20 @@ export default function Contact({
             required
           />
 
-          <button type="submit" className="rl-contact__submit">
-            {submitLabel}
+          {status && (
+            <p
+              className={`rl-contact__status rl-contact__status--${status.type}`}
+            >
+              {status.message}
+            </p>
+          )}
+
+          <button
+            type="submit"
+            className="rl-contact__submit"
+            disabled={submitting}
+          >
+            {submitting ? "Sending…" : submitLabel}
           </button>
         </form>
 
@@ -97,7 +145,12 @@ export default function Contact({
                 </p>
               ))}
               {card.link && (
-                <a className="rl-contact__info-link" href={card.link.href}>
+                <a
+                  className="rl-contact__info-link"
+                  href={card.link.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   {card.link.label}
                 </a>
               )}

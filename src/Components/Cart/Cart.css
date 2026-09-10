@@ -329,6 +329,9 @@
 }
 
 @media (max-width: 640px) {
+  .rl-cart {
+    margin: 0;
+  }
   .rl-cart__header,
   .rl-cart__shipping,
   .rl-cart__items,

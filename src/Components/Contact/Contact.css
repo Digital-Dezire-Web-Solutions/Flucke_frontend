@@ -32,12 +32,12 @@
 
 .rl-contact__heading {
   font-family: "Anton", sans-serif;
-    font-weight: 400;
-    font-size: clamp(34px, 5.5vw, 64px);
-    letter-spacing: 0px;
-    text-transform: uppercase;
-    color: var(--rl-ink);
-    margin: 0;
+  font-weight: 400;
+  font-size: clamp(34px, 5.5vw, 64px);
+  letter-spacing: 0px;
+  text-transform: uppercase;
+  color: var(--rl-ink);
+  margin: 0;
 }
 
 .rl-contact__subheading {
@@ -107,7 +107,9 @@
   padding: 17px 34px;
   border-radius: 999px;
   cursor: pointer;
-  transition: filter 0.2s ease, transform 0.2s ease;
+  transition:
+    filter 0.2s ease,
+    transform 0.2s ease;
 }
 
 .rl-contact__submit:hover {
@@ -131,7 +133,7 @@
 }
 
 .rl-contact__info-title {
-      font-family: "Anton", sans-serif;
+  font-family: "Anton", sans-serif;
   font-weight: 400;
   font-size: 24px;
   color: var(--rl-ink);
@@ -155,6 +157,20 @@
 
 .rl-contact__info-link:hover {
   text-decoration: underline;
+}
+
+.rl-contact__status {
+  margin: -4px 0 4px;
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.rl-contact__status--success {
+  color: #297a3c;
+}
+
+.rl-contact__status--error {
+  color: #b3392c;
 }
 
 @media (max-width: 960px) {

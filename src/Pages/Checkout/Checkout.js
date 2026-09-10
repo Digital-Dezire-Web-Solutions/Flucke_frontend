@@ -215,7 +215,7 @@ export default function Checkout({ taxAmount = 0, onPlaceOrder }) {
         key,
         amount: order.amount,
         currency: order.currency,
-        name: "Rosaline",
+        name: "S & S Enterprises",
         description: "Order payment",
         order_id: order.id,
         prefill: {

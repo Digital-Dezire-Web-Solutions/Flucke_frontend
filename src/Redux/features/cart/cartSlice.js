@@ -40,7 +40,6 @@ const cartSlice = createSlice({
       );
 
       if (!item) return;
-
       item.quantity += delta;
 
       if (item.quantity <= 0) {

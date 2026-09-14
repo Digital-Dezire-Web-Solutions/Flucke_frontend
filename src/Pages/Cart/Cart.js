@@ -246,17 +246,23 @@ export default function Cart({
   const totalPages = Math.ceil(recommended.length / perPage);
   const [sError, setError] = useState(null);
 
-  const updateQuantity = (id, delta) => {
+  const updateQuantity = (id, size, delta) => {
     dispatch(
       updateCartQuantity({
         id,
+        size,
         delta,
       }),
     );
   };
 
-  const removeItem = (id) => {
-    dispatch(removeFromCart(id));
+  const removeItem = (id, size) => {
+    dispatch(
+      removeFromCart({
+        id,
+        size,
+      }),
+    );
   };
 
   const subtotal = cartItems.reduce(
@@ -274,12 +280,12 @@ export default function Cart({
     recPage * perPage + perPage,
   );
 
-  // useEffect(() => {
-  //   dispatch(clearCoupon());
-  // }, [subtotal, dispatch]);
+  const shippingCost = subtotal <= 1000 ? 149 : 0;
+  const estimatedTotal =
+    (appliedCoupon?.finalAmount ?? subtotal) + shippingCost;
+
   const handleApplyCoupon = async () => {
     if (!couponCode.trim()) return;
-
     if (!token) {
       setError("Please login to apply coupon.");
       setTimeout(() => {
@@ -303,14 +309,11 @@ export default function Cart({
   const handleCheckout = () => {
     if (!token) {
       setCheckoutError("Please login to continue to checkout.");
-
       setTimeout(() => {
         setCheckoutError("");
       }, 3000);
-
       return;
     }
-
     navigate("/checkout");
   };
 
@@ -358,7 +361,7 @@ export default function Cart({
                   <div className="rl-cart-page__stepper">
                     <button
                       type="button"
-                      onClick={() => updateQuantity(item._id, -1)}
+                      onClick={() => updateQuantity(item._id, item.size, -1)}
                       aria-label="Decrease quantity"
                     >
                       <MinusIcon />
@@ -366,7 +369,7 @@ export default function Cart({
                     <span>{item.quantity}</span>
                     <button
                       type="button"
-                      onClick={() => updateQuantity(item._id, 1)}
+                      onClick={() => updateQuantity(item._id, item.size, 1)}
                       aria-label="Increase quantity"
                     >
                       <PlusIcon />
@@ -375,7 +378,7 @@ export default function Cart({
                   <button
                     type="button"
                     className="rl-cart-page__remove"
-                    onClick={() => removeItem(item._id)}
+                    onClick={() => removeItem(item._id, item.size)}
                   >
                     Remove
                   </button>
@@ -393,23 +396,6 @@ export default function Cart({
           </div>
 
           <div className="rl-cart-page__summary">
-            {/* <div className="rl-cart-page__shipping">
-              {remainingForFreeShipping > 0 ? (
-                <p>
-                  Spend ₹{remainingForFreeShipping.toFixed(2)} more for free
-                  shipping
-                </p>
-              ) : (
-                <p>You've unlocked free shipping!</p>
-              )}
-              <div className="rl-cart-page__progress">
-                <div
-                  className="rl-cart-page__progress-fill"
-                  style={{ width: `${progressPct}%` }}
-                />
-              </div>
-            </div> */}
-
             <div className="rl-cart-page__gift">
               <div className="rl-cart-page__coupon" style={{ width: "100%" }}>
                 <h4>Apply Coupon</h4>
@@ -483,8 +469,7 @@ export default function Cart({
             <div className="rl-cart-page__total-row">
               <span>Total</span>
               <span>
-                {}
-                ₹{(subtotal).toFixed(2)}
+                {}₹{subtotal.toFixed(2)}
                 {saved > 0 && (
                   <span className="rl-cart-page__total-original">
                     ₹{originalSubtotal.toFixed(2)}
@@ -498,16 +483,32 @@ export default function Cart({
                 <span>-₹{appliedCoupon?.discount.toFixed(2) || 0}</span>
               </span>
             </div>
+
+            <div className="rl-cart-page__total-row">
+              <span>Shipping</span>
+              <span>
+                {shippingCost > 0 ? (
+                  `₹${shippingCost}`
+                ) : (
+                  <>
+                    <span className="rl-cart-page__total-original">₹149</span>
+                    <span> Free</span>
+                  </>
+                )}
+              </span>
+            </div>
+
             <div className="rl-cart-page__total-row">
               <span>Estimated total</span>
-              <span>
-                {}
-                ₹{(appliedCoupon?.finalAmount ?? subtotal).toFixed(2)}
-              </span>
+              <span>₹{estimatedTotal.toFixed(2)}</span>
             </div>
             {saved > 0 && (
               <p className="rl-cart-page__saved">
-                You've saved ₹{appliedCoupon?.discount ?  (saved + appliedCoupon?.discount).toFixed(0) : saved.toFixed(0)}!
+                You've saved ₹
+                {appliedCoupon?.discount
+                  ? (saved + appliedCoupon?.discount).toFixed(0)
+                  : saved.toFixed(0)}
+                !
               </p>
             )}
 

@@ -44,10 +44,6 @@ const TopBar = () => {
     (state) => state.coupons,
   );
   const dispatch = useDispatch();
-
-  // Live offers built from active, non-expired coupons' offerText — falls
-  // back to the static list when there's nothing to show yet (e.g. before
-  // the fetch resolves, or if no coupon has offerText set).
   const OFFERS = useMemo(() => {
     const now = new Date();
     const live = (coupons || [])
@@ -58,23 +54,17 @@ const TopBar = () => {
           (!c.expiryDate || new Date(c.expiryDate) > now),
       )
       .map((c) => c.offerText);
-
     return live.length ? live : DEFAULT_OFFERS;
   }, [coupons]);
 
   const [index, setIndex] = useState(0);
   const [animate, setAnimate] = useState(false);
 
-  // Always holds the *current* OFFERS so the interval below (which only
-  // runs once, on mount) never cycles through a stale array once coupons
-  // finish loading.
   const offersRef = useRef(OFFERS);
   useEffect(() => {
     offersRef.current = OFFERS;
   }, [OFFERS]);
 
-  // Reset to the first offer whenever the underlying list actually changes,
-  // so we never end up pointing past the end of a shorter new list.
   useEffect(() => {
     setIndex(0);
   }, [OFFERS]);

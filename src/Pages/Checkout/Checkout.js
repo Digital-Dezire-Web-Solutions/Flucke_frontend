@@ -151,7 +151,8 @@ export default function Checkout({ taxAmount = 0, onPlaceOrder }) {
   );
 
   const couponDiscount = appliedCoupon?.discount || 0;
-  const grandTotal = subtotal - couponDiscount + taxAmount;
+  const shippingCost = subtotal <= 1000 ? 149 : 0;
+  const grandTotal = subtotal - couponDiscount + taxAmount + shippingCost;
   const authHeader = {
     headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
   };
@@ -246,7 +247,7 @@ export default function Checkout({ taxAmount = 0, onPlaceOrder }) {
             console.error(err);
             alert(
               `Payment succeeded but we couldn't confirm your order automatically. ` +
-              `Please contact support with payment id: ${response.razorpay_payment_id}`,
+                `Please contact support with payment id: ${response.razorpay_payment_id}`,
             );
           } finally {
             setLoading(false);
@@ -259,7 +260,7 @@ export default function Checkout({ taxAmount = 0, onPlaceOrder }) {
       };
 
       const razorpayInstance = new window.Razorpay(options);
-// console.log(razorpayInstance,"razorpayInstance")
+      // console.log(razorpayInstance,"razorpayInstance")
       razorpayInstance.on("payment.failed", (response) => {
         setLoading(false);
         alert(`Payment failed: ${response.error.description}`);
@@ -271,7 +272,7 @@ export default function Checkout({ taxAmount = 0, onPlaceOrder }) {
       console.error(err);
       alert(
         err?.response?.data?.message ||
-        "Something went wrong while starting payment.",
+          "Something went wrong while starting payment.",
       );
     }
   };
@@ -366,7 +367,11 @@ export default function Checkout({ taxAmount = 0, onPlaceOrder }) {
             </div>
           </section>
 
-          <button type="submit" className="rl-checkout__place-order" disabled={loading}>
+          <button
+            type="submit"
+            className="rl-checkout__place-order"
+            disabled={loading}
+          >
             {loading ? "Please wait…" : "Place Order"}
           </button>
 
@@ -381,7 +386,10 @@ export default function Checkout({ taxAmount = 0, onPlaceOrder }) {
 
         <aside className="rl-checkout__summary">
           {cartItems.map((item, i) => (
-            <div className="rl-checkout__summary-item" key={item.lineId || item._id}>
+            <div
+              className="rl-checkout__summary-item"
+              key={item.lineId || item._id}
+            >
               <div
                 className="rl-checkout__summary-thumb"
                 style={{
@@ -427,7 +435,9 @@ export default function Checkout({ taxAmount = 0, onPlaceOrder }) {
             </div>
             <div className="rl-checkout__totals-row">
               <span>Shipping</span>
-              <span className="rl-checkout__free">FREE</span>
+              <span className={shippingCost > 0 ? "" : "rl-checkout__free"}>
+                {shippingCost > 0 ? `₹${shippingCost.toFixed(2)}` : "FREE"}
+              </span>
             </div>
             <div className="rl-checkout__totals-row">
               <span>Discount</span>

@@ -239,7 +239,7 @@ export default function Cart({
                   <div className="rl-cart__stepper">
                     <button
                       type="button"
-                      onClick={() => updateQuantity(item._id, -1)}
+                      onClick={() => updateQuantity(item._id, item.size, -1)}
                       aria-label="Decrease quantity"
                     >
                       <MinusIcon />

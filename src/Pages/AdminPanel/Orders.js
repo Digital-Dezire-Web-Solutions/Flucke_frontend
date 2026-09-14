@@ -222,7 +222,8 @@ export default function Orders() {
             </table>
 
             <hr />
-
+            <p>Shipping Charge: {selectedOrder.shippingCharge}</p>
+            <p>Total: {selectedOrder.total}</p>
             <h3>Shipping Address</h3>
             <p>{selectedOrder.shippingAddress?.fullName}</p>
             <p>{selectedOrder.shippingAddress?.phone}</p>
@@ -305,7 +306,7 @@ export default function Orders() {
             <div className="modal-actions">
               <button onClick={closeShipModal}>Cancel</button>
               <button className="save-btn" onClick={confirmShipped}>
-                 Marked as Shipped
+                Marked as Shipped
               </button>
             </div>
           </div>

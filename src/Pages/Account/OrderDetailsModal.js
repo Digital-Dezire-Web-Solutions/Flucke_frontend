@@ -69,6 +69,7 @@ export default function OrderDetailsModal({ isOpen, order, user, onClose }) {
                 <p>Qty : {item.qty}</p>
 
                 <p>Price : ₹{item.price.toFixed(2)}</p>
+                <p>Shipping Charge : ₹{item.shippingCharge || 0}</p>
 
                 {item.size && <p>Size : {item.size}</p>}
               </div>

@@ -334,18 +334,13 @@ export default function Checkout({ taxAmount = 0, onPlaceOrder }) {
                       checked={selectedAddress?._id === address._id}
                       onChange={() => setSelectedAddress(address)}
                     />
-
                     <div>
                       <strong>{address.name}</strong>
-
                       <p>{address.area}</p>
-
                       <p>
                         {address.city}, {address.state} - {address.pincode}
                       </p>
-
                       <p>{address.phone}</p>
-
                       {address.isDefault && (
                         <span className="default-badge">Default</span>
                       )}

@@ -429,4 +429,7 @@
     width: 20%;
     /* border-radius: 12px; */
   }
+  .offer {
+    font-size: 12px;
+  }
 }

@@ -241,6 +241,12 @@
   gap: 14px;
 }
 
+.rl-products__cart-row{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .rl-products__image {
     transition: none;

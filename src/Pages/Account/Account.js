@@ -28,12 +28,17 @@ import { getMyOrders } from "../../Redux/features/order/orderSlice";
 import { useNavigate } from "react-router-dom";
 import LuxuryCta from "../../Components/LuxuryCta/LuxuryCta";
 import OrderDetailsModal from "./OrderDetailsModal";
+import { getWishlist } from "../../Redux/features/wishlist/wishlistSlice";
+import WishlistTab from "./WishlistTab";
 
 export default function Account({ onLogout }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { user, token } = useSelector((state) => state.auth);
   const { myOrders } = useSelector((state) => state.orders);
+  const { products, loading: wishlistLoading, error: wishlistError } = useSelector(
+  (state) => state.wishlist,
+);
 
   useEffect(() => {
     if (!token) {
@@ -42,6 +47,7 @@ export default function Account({ onLogout }) {
     }
 
     dispatch(getProfile());
+    dispatch(getWishlist());
     dispatch(getMyOrders());
   }, [dispatch, token]);
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -60,7 +66,12 @@ export default function Account({ onLogout }) {
       icon: BoxIcon,
       count: myOrders.length,
     },
-    { key: "wishlist", label: "Wishlist", icon: HeartIcon, count: 2 },
+    {
+      key: "wishlist",
+      label: "Wishlist",
+      icon: HeartIcon,
+      count: products?.length,
+    },
     {
       key: "addresses",
       label: "Addresses",
@@ -153,7 +164,6 @@ export default function Account({ onLogout }) {
     navigate("/");
   };
 
-
   if (!user) return <h2>Loading...</h2>;
   return (
     <main className="rl-account">
@@ -240,12 +250,11 @@ export default function Account({ onLogout }) {
           )}
 
           {activeTab === "wishlist" && (
-            <div className="rl-card">
-              <h2 className="rl-card__title">Wishlist</h2>
-              <p className="rl-card__sub">
-                Your saved items will show up here.
-              </p>
-            </div>
+            <WishlistTab
+              products={products}
+              loading={wishlistLoading}
+              error={wishlistError}
+            />
           )}
 
           {activeTab === "addresses" && (

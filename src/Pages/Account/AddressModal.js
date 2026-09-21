@@ -83,7 +83,7 @@ export default function AddressModal({ isOpen, address, onClose, onSave }) {
             <span>Phone number*</span>
             <input
               type="tel"
-              placeholder="+1 (555) 123-4567"
+              placeholder="+91 9876543210"
               value={values.phone}
               onChange={update("phone")}
               required

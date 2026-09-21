@@ -165,6 +165,12 @@ export default function Navbar() {
         }
     };
 
+    const handleLogout = () => {
+        dispatch(logout());
+        setIsMobileMenuOpen(false);
+        navigate("/");
+    };
+
     return (
         <header className="rl-navbar">
             <TopBar />
@@ -308,18 +314,30 @@ export default function Navbar() {
                         </ul>
 
                         <div className="rl-mobile-menu__actions">
-                            <button
-                                className="rl-mobile-menu__signin"
-                                onClick={() => { setIsMobileMenuOpen(false); handleAccountClick(); }}
-                            >
-                                SIGN IN
-                            </button>
-                            <button
-                                className="rl-mobile-menu__create"
-                                onClick={() => { setIsMobileMenuOpen(false); setIsAuthOpen(true); }}
-                            >
-                                CREATE AN ACCOUNT
-                            </button>
+                            {token ? (
+                                <button
+                                    className="rl-mobile-menu__signin"
+                                    onClick={handleLogout}
+                                    style={{background:"red", color:"white"}}
+                                >
+                                    LOG OUT
+                                </button>
+                            ) : (
+                                <>
+                                    <button
+                                        className="rl-mobile-menu__signin"
+                                        onClick={() => { setIsMobileMenuOpen(false); handleAccountClick(); }}
+                                    >
+                                        SIGN IN
+                                    </button>
+                                    <button
+                                        className="rl-mobile-menu__create"
+                                        onClick={() => { setIsMobileMenuOpen(false); setIsAuthOpen(true); }}
+                                    >
+                                        CREATE AN ACCOUNT
+                                    </button>
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>

@@ -3,12 +3,13 @@ import "./ProductGrid.css";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getProducts } from "../../Redux/features/products/productSlice";
-import { addToCart } from "../../Redux/features/cart/cartSlice";
+import { addToCart, updateCartQuantity } from "../../Redux/features/cart/cartSlice";
 import {
   addToWishlist,
   getWishlist,
   removeFromWishlist,
 } from "../../Redux/features/wishlist/wishlistSlice";
+import { FaMinus, FaPlus } from "react-icons/fa";
 
 function StarIcon({ filled }) {
   return (
@@ -55,37 +56,18 @@ function HeartIcon() {
   );
 }
 
-function SwapIcon() {
+function CartIcon() {
   return (
-    <svg width="17" height="17" viewBox="0 0 20 20" fill="none">
+    <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
       <path
-        d="M2 7h13M15 7l-3-3M15 7l-3 3"
+        d="M2 3h2l1.6 9.6a1.6 1.6 0 0 0 1.6 1.4h6.9a1.6 1.6 0 0 0 1.6-1.3L17 6.5H5.2"
         stroke="currentColor"
         strokeWidth="1.4"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <path
-        d="M18 13H5M5 13l3-3M5 13l3 3"
-        stroke="currentColor"
-        strokeWidth="1.4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function ArrowIcon() {
-  return (
-    <svg width="14" height="12" viewBox="0 0 14 12" fill="none">
-      <path
-        d="M0.5 6H13M13 6L8.5 1M13 6L8.5 11"
-        stroke="currentColor"
-        strokeWidth="1.4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <circle cx="8" cy="17.2" r="1.1" fill="currentColor" />
+      <circle cx="14.5" cy="17.2" r="1.1" fill="currentColor" />
     </svg>
   );
 }
@@ -112,17 +94,14 @@ export default function ProductGrid({
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { products } = useSelector((state) => state.products);
-  const { wishlistProducts } = useSelector(
-    (state) => state.wishlist?.products || [],
-  );
+  const { products: wishlistProducts } = useSelector((state) => state.wishlist);
+  const { cartItems } = useSelector((state) => state.cart);
+
   useEffect(() => {
     dispatch(getProducts());
     dispatch(getWishlist());
   }, [dispatch]);
 
-  // const handleAddToCart = (product) => {
-  //   dispatch(addToCart(product));
-  // };
   const handleAddToCart = (product) => {
     dispatch(
       addToCart({
@@ -144,14 +123,38 @@ export default function ProductGrid({
     }
   };
 
-  console.log(products, "products");
+  // addToCart matches an existing line by _id AND size, so lookups here
+  // need to match on both too, not just the product id.
+  const getCartItem = (product) => {
+    const size = product.sizes?.[0] || "default";
+    return cartItems?.find(
+      (item) => item._id === product._id && item.size === size,
+    );
+  };
+
+  const handleIncrement = (product) => {
+    const size = product.sizes?.[0] || "default";
+    const existing = getCartItem(product);
+    if (existing) {
+      dispatch(updateCartQuantity({ id: product._id, size, delta: 1 }));
+    } else {
+      dispatch(addToCart({ ...product, size, quantity: 1 }));
+    }
+  };
+
+  const handleDecrement = (product) => {
+    const size = product.sizes?.[0] || "default";
+    const existing = getCartItem(product);
+    if (!existing) return;
+    // The reducer itself drops the line once quantity hits 0, so a plain
+    // delta of -1 handles both "decrement" and "remove last one".
+    dispatch(updateCartQuantity({ id: product._id, size, delta: -1 }));
+  };
+
   return (
     <section className="rl-products">
       <div className="rl-products__intro">
-        <span className="rl-about__eyebrow">
-          {/* <span className="rl-products__eyebrow-dot" /> */}
-          {eyebrow}
-        </span>
+        <span className="rl-about__eyebrow">{eyebrow}</span>
         <h2 className="rl-products__heading">{heading}</h2>
         <p className="rl-products__subheading">{subheading}</p>
       </div>
@@ -159,6 +162,8 @@ export default function ProductGrid({
       <div className="rl-products__grid">
         {products.map((p) => {
           const inWishlist = isInWishlist(p._id);
+          const cartItem = getCartItem(p);
+
           return (
             <article className="rl-products__card" key={p._id}>
               <div className="rl-products__media">
@@ -223,21 +228,70 @@ export default function ProductGrid({
                 ₹{p.salePrice > 0 ? p.salePrice : p.price}
               </p>
 
-              <button
-                className="rl-products__add-btn"
-                onClick={() => handleAddToCart(p)}
-              >
-                Add to Cart
-              </button>
+              {cartItem ? (
+                <div className="rl-products__cart-row">
+                  <div className="rl-pdp__stepper">
+                                <button
+                                  type="button"
+                                  className="rl-pdp__stepper-btn"
+                                  onClick={() => handleDecrement(p)}
+                                  aria-label="Decrease quantity"
+                                >
+                                  <FaMinus />
+                                </button>
+                                <span className="rl-pdp__stepper-value">{cartItem.quantity}</span>
+                                <button
+                                  type="button"
+                                  className="rl-pdp__stepper-btn"
+                                  onClick={() => handleIncrement(p)}
+                                  aria-label="Increase quantity"
+                                >
+                                  <FaPlus />
+                                </button>
+                              </div>
+                  {/* <div className="rl-products__qty">
+                    <button
+                      type="button"
+                      className="rl-products__qty-btn"
+                      onClick={() => handleDecrement(p)}
+                      aria-label="Decrease quantity"
+                    >
+                      −
+                    </button>
+                    <span className="rl-products__qty-count">
+                      {cartItem.quantity}
+                    </span>
+                    <button
+                      type="button"
+                      className="rl-products__qty-btn"
+                      onClick={() => handleIncrement(p)}
+                      aria-label="Increase quantity"
+                    >
+                      +
+                    </button>
+                  </div> */}
+
+                  <button
+                    type="button"
+                    className="rl-products__add-btn"
+                    onClick={() => navigate("/cart")}
+                    style={{width: "100%",}}
+                  >
+                    Go To Cart
+                  </button>
+                </div>
+              ) : (
+                <button
+                  className="rl-products__add-btn"
+                  onClick={() => handleAddToCart(p)}
+                >
+                  Add to Cart
+                </button>
+              )}
             </article>
           );
         })}
       </div>
-
-      {/* <a className="rl-products__view-all" href={viewAllHref}>
-        {viewAllLabel}
-        <ArrowIcon />
-      </a> */}
     </section>
   );
 }

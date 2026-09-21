@@ -199,7 +199,7 @@ export default function Footer({
               </li>
               <li>
                 <a className="rl-footer__col-link">
-                  <FaLocationDot /> Laxmi Nagar, New Delhi 110092
+                  <FaLocationDot /> New Delhi 110092, India.
                 </a>
               </li>
             </ul>

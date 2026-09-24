@@ -1,9 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./Cart.css";
-import product1 from "../../Assets/Products/product4.jpg";
-import product2 from "../../Assets/Products/product5.jpg";
-import product3 from "../../Assets/Products/product3.jpg";
 import LuxuryCta from "../../Components/LuxuryCta/LuxuryCta";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -14,6 +11,7 @@ import {
   applyCoupon,
   clearCoupon,
 } from "../../Redux/features/coupon/couponslice";
+import { getProducts } from "../../Redux/features/products/productSlice";
 
 function MinusIcon() {
   return (
@@ -92,28 +90,6 @@ function DiscountIcon() {
   );
 }
 
-function GiftBowIcon() {
-  return (
-    <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-      <path
-        d="M18 14v20M18 14c-3-4-9-4-9 0s6 4 9 0ZM18 14c3-4 9-4 9 0s-6 4-9 0Z"
-        stroke="#6b4fd1"
-        strokeWidth="1.6"
-        strokeLinejoin="round"
-      />
-      <rect
-        x="7"
-        y="16"
-        width="22"
-        height="6"
-        rx="1"
-        stroke="#6b4fd1"
-        strokeWidth="1.6"
-      />
-    </svg>
-  );
-}
-
 function ChevronIcon({ direction = "left" }) {
   return (
     <svg
@@ -152,89 +128,13 @@ function StarIcon({ filled }) {
   );
 }
 
-const PAYMENT_METHODS = [
-  "VISA",
-  "G Pay",
-  // "UPI",
-  "PHONE PE",
-  "PAYTM",
-];
+const PAYMENT_METHODS = ["VISA", "G Pay", "PHONE PE", "PAYTM"];
 
-const DEFAULT_RECOMMENDED = [
-  {
-    badge: "New",
-    image: product1,
-    rating: 5,
-    reviewCount: null,
-    title: "Clear Skin Tonic",
-    price: "₹22.00",
-  },
-  {
-    badge: null,
-    image: product2,
-    rating: 3.5,
-    reviewCount: null,
-    title: "Botanical Radiance Serum",
-    price: "₹14.00",
-  },
-  {
-    badge: null,
-    image: product3,
-    rating: 4,
-    reviewCount: null,
-    title: "The Base Face Milk Essence",
-    price: "₹42.00",
-  },
-  {
-    badge: "New",
-    image: product1,
-    rating: 5,
-    reviewCount: null,
-    title: "Multivitamin Body Serum",
-    price: "₹34.00",
-  },
-  {
-    badge: null,
-    image: product2,
-    rating: 4.5,
-    reviewCount: null,
-    title: "Overnight Repair Oil",
-    price: "₹28.00",
-  },
-  {
-    badge: "New",
-    image: product3,
-    rating: 5,
-    reviewCount: null,
-    title: "Clay Detox Mask",
-    price: "₹24.00",
-  },
-  {
-    badge: null,
-    image: product1,
-    rating: 4,
-    reviewCount: null,
-    title: "Brightening Eye Cream",
-    price: "₹30.00",
-  },
-  {
-    badge: null,
-    image: product2,
-    rating: 4.5,
-    reviewCount: null,
-    title: "Rosewater Face Mist",
-    price: "₹18.00",
-  },
-];
-
-export default function Cart({
-  items,
-  recommended = DEFAULT_RECOMMENDED,
-  onCheckout,
-}) {
+export default function Cart({ items, recommended: recommendedProp, onCheckout }) {
   const dispatch = useDispatch();
   const { token } = useSelector((state) => state.auth);
   const cartItems = useSelector((state) => state.cart.cartItems);
+  const { products: allProducts } = useSelector((state) => state.products);
   const { appliedCoupon, loading, error } = useSelector(
     (state) => state.coupons,
   );
@@ -243,8 +143,33 @@ export default function Cart({
   const [couponCode, setCouponCode] = useState("");
   const [recPage, setRecPage] = useState(0);
   const perPage = 4;
-  const totalPages = Math.ceil(recommended.length / perPage);
   const [sError, setError] = useState(null);
+
+  useEffect(() => {
+    dispatch(getProducts());
+  }, [dispatch]);
+
+  // Pull real products from the store for "You May Also Like" instead of
+  // the old hardcoded list — skip anything already sitting in the cart.
+  const recommendedProducts = useMemo(() => {
+    return (allProducts || [])
+      .filter((p) => !cartItems.some((item) => item._id === p._id))
+      .map((p) => ({
+        id: p._id,
+        badge: p.badge || null,
+        image: p.images?.[0],
+        rating: p.rating || 0,
+        title: p.name,
+        price: p.salePrice > 0 ? p.salePrice : p.price,
+      }));
+  }, [allProducts, cartItems]);
+
+  const recommended =
+    recommendedProp && recommendedProp.length > 0
+      ? recommendedProp
+      : recommendedProducts;
+
+  const totalPages = Math.max(1, Math.ceil(recommended.length / perPage));
 
   const updateQuantity = (id, size, delta) => {
     dispatch(
@@ -274,6 +199,32 @@ export default function Cart({
     0,
   );
   const saved = originalSubtotal - subtotal;
+
+  // A coupon's discount/finalAmount is computed server-side against the
+  // subtotal at the moment it was applied. If quantity changes afterward,
+  // that stored finalAmount goes stale (the "shows same total after
+  // changing qty" bug) — so re-run applyCoupon against the new subtotal
+  // whenever it changes. If the coupon no longer qualifies (e.g. subtotal
+  // dropped below its minimum order value), drop it instead of leaving a
+  // stale "applied" coupon on screen.
+  useEffect(() => {
+    if (!appliedCoupon?.coupon?.code) return;
+
+    (async () => {
+      try {
+        await dispatch(
+          applyCoupon({
+            code: appliedCoupon.coupon.code,
+            amount: subtotal,
+          }),
+        ).unwrap();
+      } catch (err) {
+        dispatch(clearCoupon());
+        setCouponCode("");
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [subtotal]);
 
   const visibleRecommended = recommended.slice(
     recPage * perPage,
@@ -401,7 +352,6 @@ export default function Cart({
                 <h4>Apply Coupon</h4>
 
                 <div className="rl-footer__col rl-footer__col--newsletter">
-                  {/* <h4 className="rl-footer__col-heading">About</h4> */}
                   <form className="rl-footer__newsletter-form" onSubmit={""}>
                     <input
                       type="text"
@@ -534,57 +484,65 @@ export default function Cart({
           </div>
         </div>
 
-        <div className="rl-cart-page__recommended">
-          <div className="rl-cart-page__recommended-header">
-            <h2>You May Also Like</h2>
-            <div className="rl-cart-page__recommended-nav">
-              <button
-                type="button"
-                onClick={() => setRecPage((p) => Math.max(0, p - 1))}
-                disabled={recPage === 0}
-                aria-label="Previous products"
-              >
-                <ChevronIcon direction="left" />
-              </button>
-              <span>
-                {recPage + 1} / {totalPages}
-              </span>
-              <button
-                type="button"
-                onClick={() =>
-                  setRecPage((p) => Math.min(totalPages - 1, p + 1))
-                }
-                disabled={recPage === totalPages - 1}
-                aria-label="Next products"
-              >
-                <ChevronIcon direction="right" />
-              </button>
+        {recommended.length > 0 && (
+          <div className="rl-cart-page__recommended">
+            <div className="rl-cart-page__recommended-header">
+              <h2>You May Also Like</h2>
+              <div className="rl-cart-page__recommended-nav">
+                <button
+                  type="button"
+                  onClick={() => setRecPage((p) => Math.max(0, p - 1))}
+                  disabled={recPage === 0}
+                  aria-label="Previous products"
+                >
+                  <ChevronIcon direction="left" />
+                </button>
+                <span>
+                  {recPage + 1} / {totalPages}
+                </span>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setRecPage((p) => Math.min(totalPages - 1, p + 1))
+                  }
+                  disabled={recPage === totalPages - 1}
+                  aria-label="Next products"
+                >
+                  <ChevronIcon direction="right" />
+                </button>
+              </div>
+            </div>
+
+            <div className="rl-cart-page__recommended-grid">
+              {visibleRecommended.map((p) => (
+                <div
+                  className="rl-cart-page__rec-card"
+                  key={p.id || p.title}
+                  onClick={() => p.id && navigate(`/productdetail/${p.id}`)}
+                >
+                  <div
+                    className="rl-cart-page__rec-image"
+                    style={{ backgroundImage: `url(${p.image})` }}
+                  >
+                    {p.badge && (
+                      <span className="rl-cart-page__rec-badge">{p.badge}</span>
+                    )}
+                  </div>
+                  <div className="rl-cart-page__rec-rating">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <StarIcon key={i} filled={i < Math.round(p.rating)} />
+                    ))}
+                    <span>{p.rating.toFixed(1)}</span>
+                  </div>
+                  <h4 className="rl-cart-page__rec-title">{p.title}</h4>
+                  <p className="rl-cart-page__rec-price">
+                    ₹{Number(p.price).toFixed(2)}
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
-
-          <div className="rl-cart-page__recommended-grid">
-            {visibleRecommended.map((p) => (
-              <div className="rl-cart-page__rec-card" key={p.title}>
-                <div
-                  className="rl-cart-page__rec-image"
-                  style={{ backgroundImage: `url(${p.image})` }}
-                >
-                  {p.badge && (
-                    <span className="rl-cart-page__rec-badge">{p.badge}</span>
-                  )}
-                </div>
-                <div className="rl-cart-page__rec-rating">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <StarIcon key={i} filled={i < Math.round(p.rating)} />
-                  ))}
-                  <span>{p.rating.toFixed(1)}</span>
-                </div>
-                <h4 className="rl-cart-page__rec-title">{p.title}</h4>
-                <p className="rl-cart-page__rec-price">{p.price}</p>
-              </div>
-            ))}
-          </div>
-        </div>
+        )}
       </div>
       <LuxuryCta />
     </>

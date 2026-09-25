@@ -1,17 +1,13 @@
 import React, { useEffect, useState } from "react";
 import "./Checkout.css";
-import ProductData from "../../Data/ProductData";
 import { useDispatch, useSelector } from "react-redux";
-import { createOrder } from "../../Redux/features/order/orderSlice";
 import { clearCart } from "../../Redux/features/cart/cartSlice";
 import { clearCoupon } from "../../Redux/features/coupon/couponslice";
 import { useNavigate } from "react-router-dom";
 import LuxuryCta from "../../Components/LuxuryCta/LuxuryCta";
-import AddressesTab from "../Account/AddressTab";
 import AddressModal from "../Account/AddressModal";
 import { addAddress, getProfile } from "../../Redux/features/auth/authSlice";
 import LoadingModal from "../../Components/Loaders/LoadingModal";
-import axios from "axios";
 import api from "../../Redux/services/api";
 
 const FOOTER_LINKS = [
@@ -54,7 +50,7 @@ export default function Checkout({ taxAmount = 0, onPlaceOrder }) {
   const cartItems = useSelector((state) => state.cart.cartItems);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { user } = useSelector((state) => state.auth);
+  const { user, token } = useSelector((state) => state.auth);
   const { appliedCoupon } = useSelector((state) => state.coupons);
   const defaultAddress =
     user?.addresses?.find((a) => a.isDefault) || user?.addresses?.[0];
@@ -67,6 +63,9 @@ export default function Checkout({ taxAmount = 0, onPlaceOrder }) {
   });
 
   useEffect(() => {
+    if (token) {
+      dispatch(getProfile());
+    }
     loadRazorpayScript();
   }, []);
 
@@ -109,7 +108,6 @@ export default function Checkout({ taxAmount = 0, onPlaceOrder }) {
     zip: "",
     address: "",
   });
-
   useEffect(() => {
     if (!selectedAddress) return;
 
@@ -135,6 +133,15 @@ export default function Checkout({ taxAmount = 0, onPlaceOrder }) {
       setSelectedAddress(null);
     }
   }, [user?.addresses]);
+
+  useEffect(() => {
+    if (token) {
+      console.log(user,"users")
+      setForm({
+        email: user?.email ,
+      });
+    }
+  }, [user]);
 
   const handleField = (field) => (e) =>
     setForm((f) => ({ ...f, [field]: e.target.value }));
@@ -216,7 +223,7 @@ export default function Checkout({ taxAmount = 0, onPlaceOrder }) {
         key,
         amount: order.amount,
         currency: order.currency,
-        name: "S & S Enterprises",
+        name: "S and S Enterprises",
         description: "Order payment",
         order_id: order.id,
         prefill: {

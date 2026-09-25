@@ -11,6 +11,7 @@ import {
     login,
     register,
     logout,
+    getProfile,
 } from "../../Redux/features/auth/authSlice";
 import api from "../../Redux/services/api";
 
@@ -88,6 +89,10 @@ export default function Navbar() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // ADD THIS
 
     const navigate = useNavigate();
+
+    useEffect(() => {
+        dispatch(getProfile());
+    }, [dispatch, token]);
 
     useEffect(() => {
         if (isMobileMenuOpen) {
@@ -318,7 +323,7 @@ export default function Navbar() {
                                 <button
                                     className="rl-mobile-menu__signin"
                                     onClick={handleLogout}
-                                    style={{background:"red", color:"white"}}
+                                    style={{ background: "red", color: "white" }}
                                 >
                                     LOG OUT
                                 </button>

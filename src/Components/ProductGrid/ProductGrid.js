@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import "./ProductGrid.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getProducts } from "../../Redux/features/products/productSlice";
 import { addToCart, updateCartQuantity } from "../../Redux/features/cart/cartSlice";
@@ -72,6 +72,19 @@ function CartIcon() {
   );
 }
 
+function ArrowIcon({ direction = "right" }) {
+  return (
+    <svg width="26" height="18" viewBox="0 0 26 18" fill="none" style={{ transform: direction === "left" ? "scaleX(-1)" : undefined }}>
+      <path
+        d="M1 9H25M25 9L18 2M25 9L18 16"
+        stroke="currentColor"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 function SparkleIcon() {
   return (
     <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
@@ -101,6 +114,24 @@ export default function ProductGrid({
     dispatch(getProducts());
     dispatch(getWishlist());
   }, [dispatch]);
+
+  const location = useLocation();
+
+const isHomePage = location.pathname === "/";
+const isProductPage = location.pathname === "/product";
+const isProductDetailPage = location.pathname.startsWith("/productdetail/");
+
+const featuredProducts = products.filter(
+  (product) => product.isFeatured === true
+);
+
+const displayedProducts = isProductPage
+  ? [...products].reverse()
+  : isHomePage
+    ? [...featuredProducts].reverse()
+    : isProductDetailPage
+      ? [...featuredProducts].reverse()
+      : [];
 
   const handleAddToCart = (product) => {
     dispatch(
@@ -160,7 +191,7 @@ export default function ProductGrid({
       </div>
 
       <div className="rl-products__grid">
-        {products.map((p) => {
+        {displayedProducts.map((p) => {
           const inWishlist = isInWishlist(p._id);
           const cartItem = getCartItem(p);
 
@@ -231,24 +262,24 @@ export default function ProductGrid({
               {cartItem ? (
                 <div className="rl-products__cart-row">
                   <div className="rl-pdp__stepper">
-                                <button
-                                  type="button"
-                                  className="rl-pdp__stepper-btn"
-                                  onClick={() => handleDecrement(p)}
-                                  aria-label="Decrease quantity"
-                                >
-                                  <FaMinus />
-                                </button>
-                                <span className="rl-pdp__stepper-value">{cartItem.quantity}</span>
-                                <button
-                                  type="button"
-                                  className="rl-pdp__stepper-btn"
-                                  onClick={() => handleIncrement(p)}
-                                  aria-label="Increase quantity"
-                                >
-                                  <FaPlus />
-                                </button>
-                              </div>
+                    <button
+                      type="button"
+                      className="rl-pdp__stepper-btn"
+                      onClick={() => handleDecrement(p)}
+                      aria-label="Decrease quantity"
+                    >
+                      <FaMinus />
+                    </button>
+                    <span className="rl-pdp__stepper-value">{cartItem.quantity}</span>
+                    <button
+                      type="button"
+                      className="rl-pdp__stepper-btn"
+                      onClick={() => handleIncrement(p)}
+                      aria-label="Increase quantity"
+                    >
+                      <FaPlus />
+                    </button>
+                  </div>
                   {/* <div className="rl-products__qty">
                     <button
                       type="button"
@@ -275,7 +306,7 @@ export default function ProductGrid({
                     type="button"
                     className="rl-products__add-btn"
                     onClick={() => navigate("/cart")}
-                    style={{width: "100%",}}
+                    style={{ width: "100%", }}
                   >
                     Go To Cart
                   </button>
@@ -292,6 +323,16 @@ export default function ProductGrid({
           );
         })}
       </div>
+      {isHomePage && (
+        <div className="rl-products__intro">
+          <button
+            className="rl-banner__cta"
+            onClick={() => navigate("/product")}
+          >
+            All Products <ArrowIcon />
+          </button>
+        </div>
+      )}
     </section>
   );
 }

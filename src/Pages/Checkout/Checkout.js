@@ -9,6 +9,7 @@ import AddressModal from "../Account/AddressModal";
 import { addAddress, getProfile } from "../../Redux/features/auth/authSlice";
 import LoadingModal from "../../Components/Loaders/LoadingModal";
 import api from "../../Redux/services/api";
+import Alert from "../../Components/Alert/Alert";
 
 const FOOTER_LINKS = [
   "Refund policy",
@@ -61,6 +62,31 @@ export default function Checkout({ taxAmount = 0, onPlaceOrder }) {
     open: false,
     address: null,
   });
+
+  const [alertModal, setAlertModal] = useState({
+    open: false,
+    title: "",
+    message: "",
+    type: "info",
+  });
+
+  const showAlert = (message, title = "Notice", type = "info") => {
+    setAlertModal({
+      open: true,
+      title,
+      message,
+      type,
+    });
+  };
+
+  const closeAlert = () => {
+    setAlertModal({
+      open: false,
+      title: "",
+      message: "",
+      type: "info",
+    });
+  };
 
   useEffect(() => {
     if (token) {
@@ -136,9 +162,9 @@ export default function Checkout({ taxAmount = 0, onPlaceOrder }) {
 
   useEffect(() => {
     if (token) {
-      console.log(user,"users")
+      console.log(user, "users");
       setForm({
-        email: user?.email ,
+        email: user?.email,
       });
     }
   }, [user]);
@@ -166,14 +192,17 @@ export default function Checkout({ taxAmount = 0, onPlaceOrder }) {
 
   const handlePlaceOrder = async (e) => {
     e.preventDefault();
-
+    console.log(cartItems, "items");
     if (!cartItems.length) {
-      alert("Your cart is empty");
+      showAlert("Your cart is empty.", "Cart Empty");
       return;
     }
 
     if (!selectedAddress) {
-      alert("Please add and select a delivery address.");
+      showAlert(
+        "Please add and select a delivery address.",
+        "Address Required",
+      );
       return;
     }
 
@@ -203,8 +232,10 @@ export default function Checkout({ taxAmount = 0, onPlaceOrder }) {
       const scriptReady = await loadRazorpayScript();
       if (!scriptReady) {
         setLoading(false);
-        alert(
+        showAlert(
           "Could not load the payment gateway. Check your connection and try again.",
+          "Payment Error",
+          "error",
         );
         return;
       }
@@ -248,13 +279,18 @@ export default function Checkout({ taxAmount = 0, onPlaceOrder }) {
 
             dispatch(clearCart());
             dispatch(clearCoupon());
-            alert("Order placed successfully.");
+            showAlert(
+              "Your order has been placed successfully.",
+              "Order Successful",
+              "success",
+            );
             navigate("/account");
           } catch (err) {
             console.error(err);
-            alert(
-              `Payment succeeded but we couldn't confirm your order automatically. ` +
-                `Please contact support with payment id: ${response.razorpay_payment_id}`,
+            showAlert(
+              `Payment failed: ${response.error.description}`,
+              "Payment Failed",
+              "error",
             );
           } finally {
             setLoading(false);
@@ -270,16 +306,22 @@ export default function Checkout({ taxAmount = 0, onPlaceOrder }) {
       // console.log(razorpayInstance,"razorpayInstance")
       razorpayInstance.on("payment.failed", (response) => {
         setLoading(false);
-        alert(`Payment failed: ${response.error.description}`);
+        showAlert(
+          `Payment failed: ${response.error.description}`,
+          "Payment Failed",
+          "error",
+        );
       });
 
       razorpayInstance.open();
     } catch (err) {
       setLoading(false);
       console.error(err);
-      alert(
+      showAlert(
         err?.response?.data?.message ||
           "Something went wrong while starting payment.",
+        "Something Went Wrong",
+        "error",
       );
     }
   };
@@ -467,6 +509,9 @@ export default function Checkout({ taxAmount = 0, onPlaceOrder }) {
           onSave={handleSaveAddress}
         />
         {loading === true && <LoadingModal loadingtype={"truck"} />}
+        {alertModal.open && (
+          <Alert alertModal={alertModal} closeAlert={closeAlert} />
+        )}
       </div>
 
       <LuxuryCta />

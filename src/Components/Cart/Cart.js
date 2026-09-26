@@ -6,6 +6,7 @@ import {
   removeFromCart,
   updateCartQuantity,
 } from "../../Redux/features/cart/cartSlice";
+import Alert from "../Alert/Alert";
 
 function CloseIcon() {
   return (
@@ -123,6 +124,30 @@ export default function Cart({
   const dispatch = useDispatch();
 
   const cartItems = useSelector((state) => state.cart.cartItems);
+  const [alertModal, setAlertModal] = useState({
+    open: false,
+    title: "",
+    message: "",
+    type: "info",
+  });
+
+  const showAlert = (message, title = "Notice", type = "info") => {
+    setAlertModal({
+      open: true,
+      title,
+      message,
+      type,
+    });
+  };
+
+  const closeAlert = () => {
+    setAlertModal({
+      open: false,
+      title: "",
+      message: "",
+      type: "info",
+    });
+  };
 
   useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : "";
@@ -157,6 +182,11 @@ export default function Cart({
   );
   const progressPct = Math.min(100, (subtotal / freeShippingThreshold) * 100);
   const handleViewCart = () => {
+    if (cartItems.length === 0) {
+      showAlert("Your cart is empty, Add Some Product.", "Cart Empty");
+      return;
+    }
+
     if (onViewCart) {
       onViewCart();
     } else {
@@ -166,6 +196,11 @@ export default function Cart({
   };
 
   const handleCheckout = () => {
+    if (cartItems.length === 0) {
+      showAlert("Your cart is empty, Add Some Product.", "Cart Empty");
+      return;
+    }
+
     if (onCheckout) {
       onCheckout();
     } else {
@@ -324,6 +359,9 @@ export default function Cart({
           </p>
         </div>
       </aside>
+      {alertModal.open && (
+        <Alert alertModal={alertModal} closeAlert={closeAlert} />
+      )}
     </>
   );
 }

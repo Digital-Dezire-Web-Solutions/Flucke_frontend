@@ -5,7 +5,7 @@ import { FiShoppingCart } from "react-icons/fi";
 import { FaAmazon } from "react-icons/fa";
 import { FaPlus, FaMinus } from "react-icons/fa6";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { getProduct, getProducts } from "../../Redux/features/products/productSlice";
 import { addToCart } from "../../Redux/features/cart/cartSlice";
 
@@ -124,6 +124,10 @@ export default function ProductDetail({
 }) {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const isHomePage = location.pathname === "/";
+  const isProductDetailPage = location.pathname.startsWith("/productdetail/");
   const dispatch = useDispatch();
   const { product, products } = useSelector((state) => state.products);
 
@@ -148,8 +152,14 @@ export default function ProductDetail({
     return () => clearTimeout(t);
   }, [cartFeedback]);
 
-  const activeProduct =
-    product && product._id === id
+  const featuredProducts = [...products]
+    .filter((item) => item.isFeatured === true)
+    .reverse()
+    .slice(0, 2);
+
+  const activeProduct = isHomePage
+    ? featuredProducts[0]
+    : product && product._id === id
       ? product
       : products.find((p) => p._id === id) ||
       products.find((p) => p.isFeatured) ||
@@ -215,11 +225,9 @@ export default function ProductDetail({
     },
   ];
 
-  const lineup = products.filter(
-    (item) =>
-      item._id !== activeProduct._id &&
-      item.category?._id === activeProduct.category?._id,
-  );
+  const lineup = isHomePage
+    ? featuredProducts.slice(1, 2)
+    : [];
 
   return (
     <section className="rl-pdp" ref={topRef}>

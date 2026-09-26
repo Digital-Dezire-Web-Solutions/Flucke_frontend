@@ -12,6 +12,12 @@ import {
   clearCoupon,
 } from "../../Redux/features/coupon/couponslice";
 import { getProducts } from "../../Redux/features/products/productSlice";
+import AuthModal from "../../Components/AuthModal/AuthModal";
+import {
+    login,
+    register,
+} from "../../Redux/features/auth/authSlice";
+import api from "../../Redux/services/api";
 
 function MinusIcon() {
   return (
@@ -130,7 +136,11 @@ function StarIcon({ filled }) {
 
 const PAYMENT_METHODS = ["VISA", "G Pay", "PHONE PE", "PAYTM"];
 
-export default function Cart({ items, recommended: recommendedProp, onCheckout }) {
+export default function Cart({
+  items,
+  recommended: recommendedProp,
+  onCheckout,
+}) {
   const dispatch = useDispatch();
   const { token } = useSelector((state) => state.auth);
   const cartItems = useSelector((state) => state.cart.cartItems);
@@ -144,6 +154,7 @@ export default function Cart({ items, recommended: recommendedProp, onCheckout }
   const [recPage, setRecPage] = useState(0);
   const perPage = 4;
   const [sError, setError] = useState(null);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
 
   useEffect(() => {
     dispatch(getProducts());
@@ -153,7 +164,11 @@ export default function Cart({ items, recommended: recommendedProp, onCheckout }
   // the old hardcoded list — skip anything already sitting in the cart.
   const recommendedProducts = useMemo(() => {
     return (allProducts || [])
-      .filter((p) => !cartItems.some((item) => item._id === p._id))
+      .filter(
+        (p) =>
+          p.isFeatured === true &&
+          !cartItems.some((item) => item._id === p._id),
+      )
       .map((p) => ({
         id: p._id,
         badge: p.badge || null,
@@ -259,6 +274,7 @@ export default function Cart({ items, recommended: recommendedProp, onCheckout }
 
   const handleCheckout = () => {
     if (!token) {
+      setIsAuthOpen(true);
       setCheckoutError("Please login to continue to checkout.");
       setTimeout(() => {
         setCheckoutError("");
@@ -266,6 +282,52 @@ export default function Cart({ items, recommended: recommendedProp, onCheckout }
       return;
     }
     navigate("/checkout");
+  };
+
+  const handleLogin = async (data) => {
+    const result = await dispatch(login(data)).unwrap();
+
+    const user = result.user;
+
+    if (user.role === "admin") {
+      navigate("/admin");
+    } else {
+      navigate("/account");
+    }
+
+    return result;
+  };
+
+  const handleSignup = async (data) => {
+    const result = await dispatch(register(data)).unwrap();
+
+    const user = result.user;
+
+    if (user.role === "admin") {
+      navigate("/admin");
+    } else {
+      navigate("/account");
+    }
+
+    return result;
+  };
+
+  const handleForgotPassword = async ({ email }) => {
+    const { data } = await api.post("/auth/forgot-password", { email });
+    if (!data.success) {
+      throw new Error(data.message || "Could not send the reset code.");
+    }
+  };
+
+  const handleResetPassword = async ({ email, otp, newPassword }) => {
+    const { data } = await api.post("/auth/reset-password", {
+      email,
+      otp,
+      newPassword,
+    });
+    if (!data.success) {
+      throw new Error(data.message || "Could not reset your password.");
+    }
   };
 
   return (
@@ -467,7 +529,7 @@ export default function Cart({ items, recommended: recommendedProp, onCheckout }
               className="rl-cart-page__checkout-btn"
               onClick={handleCheckout}
             >
-              Check Out
+              {token ? "Check Out" : "Login to Continue"}
             </button>
             {checkoutError && <p className="coupon-error">{checkoutError}</p>}
             <p className="rl-cart-page__tax-note">
@@ -544,6 +606,14 @@ export default function Cart({ items, recommended: recommendedProp, onCheckout }
           </div>
         )}
       </div>
+      <AuthModal
+        isOpen={isAuthOpen}
+        onClose={() => setIsAuthOpen(false)}
+        onLogin={handleLogin}
+        onSignup={handleSignup}
+        onForgotPassword={handleForgotPassword}
+        onResetPassword={handleResetPassword}
+      />
       <LuxuryCta />
     </>
   );

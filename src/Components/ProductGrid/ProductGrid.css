@@ -245,6 +245,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  margin-top: auto;
 }
 
 @media (prefers-reduced-motion: reduce) {

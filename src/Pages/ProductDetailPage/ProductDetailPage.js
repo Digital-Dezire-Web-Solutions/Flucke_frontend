@@ -6,6 +6,7 @@ import ProductDetail from "../../Components/ProductDetail/ProductDetail";
 import LuxuryCta from "../../Components/LuxuryCta/LuxuryCta";
 
 import { getProduct } from "../../Redux/features/products/productSlice";
+import ProductGrid from "../../Components/ProductGrid/ProductGrid";
 
 const ProductDetailPage = () => {
   const { id } = useParams();
@@ -19,6 +20,7 @@ const ProductDetailPage = () => {
   return (
     <div className="product-page">
       <ProductDetail />
+      <ProductGrid />
       <LuxuryCta />
     </div>
   );
